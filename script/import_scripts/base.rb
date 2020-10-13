@@ -202,6 +202,7 @@ class ImportScripts::Base
 
   def create_group(opts, import_id)
     opts = opts.dup.tap { |o| o.delete(:id) }
+    post_create_action = opts.delete(:post_create_action)
 
     import_name = opts[:name].presence || opts[:full_name]
     opts[:name] = UserNameSuggester.suggest(import_name)
@@ -214,6 +215,10 @@ class ImportScripts::Base
     g.custom_fields["import_name"] = import_name
 
     g.tap(&:save)
+
+    post_create_action.try(:call, g) if g.persisted?
+
+    g
   end
 
   def all_records_exist?(type, import_ids)

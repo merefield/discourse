@@ -9,8 +9,10 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
   JSON_FILE_PATH = ENV['JSON_FILE']
   JSON_USER_FILE = 'users.json'
+  JSON_GROUP_FILE = 'groups.json'
   JSON_USER_EXTRAS_FILE = 'users_additional_info.json'
   USER_AVATAR_DIRECTORY = 'user_avatars/'
+  GROUP_AVATAR_DIRECTORY = 'group_avatars/'
   JSON_FILE_DIRECTORY = '/shared/import/data/ama-pin-transfer/'
   BATCH_SIZE ||= 1000
 
@@ -18,11 +20,13 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     super
 
     @imported_user_json = load_user_json
+    @imported_group_json = load_group_json
   end
 
   def execute
     puts "", "Importing from JSON file..."
 
+    import_groups
     import_users
     # import_discussions
 
@@ -44,6 +48,18 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     mrg
   end
 
+  def load_group_json
+    master = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_GROUP_FILE))
+
+    subset = []
+    master.each do |master_record|
+      if master_record['parent_group_id'] == 203
+        subset.push(master_record)
+      end
+    end
+    subset
+  end
+
   def username_for(name)
     result = name.downcase.gsub(/[^a-z0-9\-\_]/, '')
 
@@ -52,6 +68,49 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     end
 
     result
+  end
+
+  def import_groups
+    puts '', "Importing groups"
+
+    groups = []
+
+    @imported_group_json.each do |g|
+      groups << g
+    end
+
+    groups.uniq!
+
+    puts groups[0]
+
+    create_groups(groups.first(15)) do |g|
+      {
+        id: g['id'],
+        name: g['name'],
+        bio_raw: g['description'],
+        visibility_level: g['private'] ? 3 : 1,
+        members_visibility_level: g['private'] ? 3 : 1,
+        created_at: Time.now, #g['joined'],
+        updated_at: Time.now,
+        post_create_action: proc do |newgroup|
+          puts newgroup.id.to_s
+          puts g['id'].to_s
+          png_path = JSON_FILE_DIRECTORY + GROUP_AVATAR_DIRECTORY + g['id'].to_s + '.png'
+          if File.exists?(png_path)
+            upload = create_upload(newgroup.id, png_path, File.basename(png_path))
+            puts upload.to_s
+            if upload.nil?
+              puts "Upload failed. Path #{png_path} Id New #{newgroup.id}"
+            else
+              puts "Upload succeeded. Path #{png_path} Id New #{newgroup.id}  Upload Id #{upload.id} "
+              # newgroup.create_group_avatar
+              # newgroup.group_flair.update(custom_upload_id: upload.id)
+              newgroup.update(flair_upload_id: upload.id)
+            end
+          end
+        end
+      }
+    end
   end
 
   def import_users
