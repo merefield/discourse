@@ -9,6 +9,8 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
   JSON_FILE_PATH = ENV['JSON_FILE']
   JSON_USER_FILE = 'users.json'
+  JSON_USER_EXTRAS_FILE = 'users_additional_info.json'
+  USER_AVATAR_DIRECTORY = 'user_avatars/'
   JSON_FILE_DIRECTORY = '/shared/import/data/ama-pin-transfer/'
   BATCH_SIZE ||= 1000
 
@@ -28,8 +30,18 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
   end
 
   def load_user_json
-    #JSON.parse(File.read(JSON_FILE_PATH))
-    JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_USER_FILE))
+    master = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_USER_FILE))
+    additional = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_USER_EXTRAS_FILE))
+    
+    mrg = []
+    master.each do |master_record|
+      additional.each do |additional_record|
+        if additional_record['user_id'] == master_record['id']
+          mrg.push(master_record.merge(additional_record))
+        end
+      end
+    end
+    mrg
   end
 
   def username_for(name)
@@ -55,16 +67,45 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
     puts users[0]
 
-    create_users(users.first(150)) do |u|
+    create_users(users.first(15)) do |u|
       {
         id: u['id'],
-        username: username_for(u['email']),
-        name: (u['firstname'] + ' ' + u['middlename'] + ' ' + u['lastname']).gsub(/ +/, " "),
+        username: u['shortname'],
+        name: (u['title'] + ' ' + u['firstname'] + ' ' + u['middlename'] + ' ' + u['lastname'] + ' ' + u['suffix']).gsub(/ +/, " "),
         email: u['email'],
         location: (u['address_first_line'] + ' ' + u['postal_code'] + ' ' + u['city'] + + ' ' + u['state'] + ' ' + u['country']).gsub(/ +/, " "),
         website: u['url'].presence || u['linkedin'].presence || u['googleplus'].presence || u['twitter'].presence || u['facebook'].presence || u['tumblr'].presence  || u['pinterest'].presence,
         created_at: u['joined'],
-        updated_at: Time.now
+        updated_at: Time.now,
+        post_create_action: proc do |newuser|
+          puts newuser.id.to_s
+          puts u['id'].to_s
+          png_path = JSON_FILE_DIRECTORY + USER_AVATAR_DIRECTORY + u['id'].to_s + '.png'
+          jpg_path = JSON_FILE_DIRECTORY + USER_AVATAR_DIRECTORY + u['id'].to_s + '.jpg'
+          if File.exists?(png_path)
+            upload = create_upload(newuser.id, png_path, File.basename(png_path))
+            puts upload.to_s
+            if upload.nil?
+              puts "Upload failed. Path #{png_path} Id New #{newuser.id}"
+            else
+              puts "Upload succeeded. Path #{png_path} Id New #{newuser.id}  Upload Id #{upload.id} "
+              newuser.create_user_avatar
+              newuser.user_avatar.update(custom_upload_id: upload.id)
+              newuser.update(uploaded_avatar_id: upload.id)
+            end
+          elsif File.exists?(jpg_path)
+            upload = create_upload(newuser.id, jpg_path, File.basename(jpg_path))
+            puts upload.to_s
+            if upload.nil?
+              puts "Upload failed. Path #{jpg_path} Id New #{newuser.id}"
+            else
+              puts "Upload succeeded. Path #{jpg_path} Id New #{newuser.id}  Upload Id #{upload.id} "
+              newuser.create_user_avatar
+              newuser.user_avatar.update(custom_upload_id: upload.id)
+              newuser.update(uploaded_avatar_id: upload.id)
+            end
+          end
+        end
       }
     end
   end
