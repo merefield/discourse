@@ -75,6 +75,8 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         email: u['email'],
         location: (u['address_first_line'] + ' ' + u['postal_code'] + ' ' + u['city'] + + ' ' + u['state'] + ' ' + u['country']).gsub(/ +/, " "),
         website: u['url'].presence || u['linkedin'].presence || u['googleplus'].presence || u['twitter'].presence || u['facebook'].presence || u['tumblr'].presence  || u['pinterest'].presence,
+        bio_raw: u['summary'],
+        date_of_birth: u['birth_day'].to_s + '/' + u['birth_month'].to_s + '/' +  u['birth_year'].to_s,
         created_at: u['joined'],
         updated_at: Time.now,
         post_create_action: proc do |newuser|
