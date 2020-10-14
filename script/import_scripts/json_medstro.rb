@@ -18,17 +18,23 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
   def initialize
     super
-
+    puts "", "Importing from JSON files..."
     @imported_user_json = load_user_json
     @imported_group_json = load_group_json
   end
 
   def execute
-    puts "", "Importing from JSON file..."
+    puts "", "Executing import..."
 
     import_groups
     import_users
-    # import_discussions
+    #import_categories
+    #import_topics
+    #import_posts
+    #add_moderators
+    #add_admins
+    #import_avatars
+    #create_permalinks
 
     puts "", "Done"
   end
@@ -38,7 +44,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     additional = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_USER_EXTRAS_FILE))
     
     mrg = []
-    master.each do |master_record|
+    master.first(50).each do |master_record|
       additional.each do |additional_record|
         if additional_record['user_id'] == master_record['id']
           mrg.push(master_record.merge(additional_record))
@@ -104,8 +110,6 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
               puts "Upload failed. Path #{png_path} Id New #{newgroup.id}"
             else
               puts "Upload succeeded. Path #{png_path} Id New #{newgroup.id}  Upload Id #{upload.id} "
-              # newgroup.create_group_avatar
-              # newgroup.group_flair.update(custom_upload_id: upload.id)
               newgroup.update(flair_upload_id: upload.id)
             end
           end
@@ -140,6 +144,8 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         created_at: u['joined'],
         updated_at: Time.now,
         post_create_action: proc do |newuser|
+          add_user_to_groups(newuser, u['group_ids'])
+
           puts newuser.id.to_s
           puts u['id'].to_s
           png_path = JSON_FILE_DIRECTORY + USER_AVATAR_DIRECTORY + u['id'].to_s + '.png'
@@ -212,6 +218,23 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     end
 
     puts "", "Imported #{topics} topics with #{topics + posts} posts."
+  end
+end
+
+def add_user_to_groups(user, imported_groups)
+  puts "", "adding user #{user.id} to groups..."
+
+  GroupUser.transaction do
+    GroupUser.where("user_id = #{user.id}").each do |group_user|
+      if !Group.find_by(id: group_user.group_id).automatic
+        group_user.delete
+      end
+    end
+    imported_groups.each do |mgid|
+      (group_id = group_id_from_imported_group_id(mgid)) &&
+        GroupUser.find_or_create_by(user: user, group_id: group_id) &&
+      Group.reset_counters(group_id, :group_users)
+    end
   end
 end
 
