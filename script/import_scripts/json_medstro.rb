@@ -87,6 +87,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       {
         id: g['id'],
         name: g['name'],
+        full_name: g['name'],
         bio_raw: g['description'],
         visibility_level: g['private'] ? 3 : 1,
         members_visibility_level: g['private'] ? 3 : 1,
