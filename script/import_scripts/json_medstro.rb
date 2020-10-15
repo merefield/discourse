@@ -10,6 +10,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
   JSON_FILE_PATH = ENV['JSON_FILE']
   JSON_USER_FILE = 'users.json'
   JSON_GROUP_FILE = 'groups.json'
+  JSON_DISCUSSION_FILE = 'discussions.json'
   JSON_USER_EXTRAS_FILE = 'users_additional_info.json'
   USER_AVATAR_DIRECTORY = 'user_avatars/'
   GROUP_AVATAR_DIRECTORY = 'group_avatars/'
@@ -18,9 +19,25 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
   def initialize
     super
+    puts "", "Reset data..."
+    reset_instance
     puts "", "Importing from JSON files..."
+    puts "", "Importing User JSON ..."
     @imported_user_json = load_user_json
+    puts "", "Importing Group JSON ..."
     @imported_group_json = load_group_json
+    puts "", "Importing Discussion JSON ..."
+    @imported_discussion_json = load_discussion_json
+  end
+
+  def reset_instance
+    puts "", "Scrubbing..."
+    puts "", "Scrubbing Categories..."
+    Category.where("id > 4").destroy_all
+    puts "", "Scrubbing Users..."
+    User.where("id > 1").destroy_all
+    puts "", "Scrubbing Groups..."
+    Group.where("automatic = FALSE").destroy_all
   end
 
   def execute
@@ -28,7 +45,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
     import_groups
     import_users
-    #import_categories
+    import_categories
     #import_topics
     #import_posts
     #add_moderators
@@ -58,12 +75,30 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     master = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_GROUP_FILE))
 
     subset = []
+    top_level = []
     master.each do |master_record|
-      if master_record['parent_group_id'] == 203
-        subset.push(master_record)
+      if master_record['parent_group_id'] == 203 #|| master_record['id'] == 203
+        top_level.push(master_record)
       end
     end
+
+    master.each do |master_record|
+      top_level.each do |top_level|
+        if master_record['parent_group_id'] == top_level['id'] #|| master_record['id'] == 203
+          subset.push(master_record)
+        end
+      end
+    end
+
+    top_level.each do |top_level|
+      subset.push(top_level)
+    end
+
     subset
+  end
+
+  def load_discussion_json
+    JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_DISCUSSION_FILE))
   end
 
   def username_for(name)
@@ -82,14 +117,16 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     groups = []
 
     @imported_group_json.each do |g|
-      groups << g
+      if g['parent_group_id'] == 203
+        groups << g
+      end
     end
 
     groups.uniq!
 
     puts groups[0]
 
-    create_groups(groups.first(15)) do |g|
+    create_groups(groups) do |g|
       {
         id: g['id'],
         name: g['name'],
@@ -102,6 +139,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         post_create_action: proc do |newgroup|
           puts newgroup.id.to_s
           puts g['id'].to_s
+          newgroup.custom_fields["import_parent_group_id"] = g['parent_group_id']
           png_path = JSON_FILE_DIRECTORY + GROUP_AVATAR_DIRECTORY + g['id'].to_s + '.png'
           if File.exists?(png_path)
             upload = create_upload(newgroup.id, png_path, File.basename(png_path))
@@ -175,6 +213,136 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
           end
         end
       }
+    end
+  end
+
+  def import_categories
+    puts "", "Importing Categories"
+
+    top_level_categories = []
+    mid_level_categories = []
+    child_categories = []
+    eligible = []
+
+    # Group.all.each do |group|
+    #   if group.automatic == false
+    #     eligible.push(group.custom_fields["import_id"])
+    #   end
+    # end
+
+    puts "", "Importing Top Level Categories"
+
+    @imported_group_json.each do |top_level_category|
+      if top_level_category['parent_group_id'] == 203
+        top_level_categories.push(top_level_category)
+        eligible.push(top_level_category['id'])
+      end
+    end
+
+    top_level_categories.uniq!
+
+    puts top_level_categories[0]
+
+    puts "", "Found #{top_level_categories.count} Top Level Categories"
+    puts "", "Found #{eligible.count} Eligible Parent Categories so far"
+
+    Category.transaction do
+      create_categories(top_level_categories) do |g|
+        {
+          id: g['id'],
+          name: g['name'],
+          description: g['description'],
+          created_at: Time.now,
+          updated_at: Time.now,
+          post_create_action: proc do |newcategory|
+            newcategory.custom_fields["import_group_id"] = g['id'].to_s
+            newcategory.save!
+          end
+        }
+      end
+    end
+
+    @imported_group_json.each do |mid_level_category|
+      if mid_level_category['parent_group_id'] != 203
+        mid_level_categories.push(mid_level_category)
+        eligible.push(mid_level_category['id'])
+      end
+    end
+
+    mid_level_categories.uniq!
+
+    puts mid_level_categories[0]
+
+    puts "", "Found #{mid_level_categories.count} Mid Level Categories"
+    puts "", "Found #{eligible.count} Eligible Parent Categories so far"
+
+
+    Category.transaction do
+      create_categories(mid_level_categories) do |g|
+        {
+          id: g['id'],
+          name: g['name'],
+          description: g['description'],
+          created_at: Time.now,
+          updated_at: Time.now,
+          post_create_action: proc do |newcategory|
+            newcategory.custom_fields["import_group_id"] = g['id'].to_s
+            newcategory.custom_fields["import_parent_group_id"] = g['parent_group_id'].to_s
+            newcategory.save!
+          end
+        }
+      end
+    end
+
+    puts "", "Importing Child Categories"
+
+    @imported_discussion_json.each do |child_category|
+      if eligible.include?(child_category['group_id'].to_s)
+        # Group.all.each do |g|
+        #   if g.custom_fields["import_id"] == category['parent_group_id'].to_s
+            #byebug
+            #category['import_parent_group_id'] = g.custom_fields["import_parent_group_id"]
+        child_categories.push(child_category)
+            # break
+          # end
+        # end
+      end
+    end
+    
+    child_categories.uniq!
+
+    puts child_categories[0]
+
+    puts "", "Found #{child_categories.count} Child Level Categories"
+
+    Category.transaction do
+      create_categories(child_categories) do |c|
+        {
+          id: c['id'],
+          name: c['title'],
+          description: c['description'],
+          created_at: Time.now,
+          updated_at: Time.now,
+          post_create_action: proc do |newcategory|
+            newcategory.custom_fields["import_parent_group_id"] = c['import_parent_group_id'].to_s
+            newcategory.custom_fields["import_group_id"] = c['group_id'].to_s
+            newcategory.save!
+          end
+        }
+      end
+    end
+
+    Category.transaction do
+      Category.all.each do |category|
+        if category.custom_fields["import_parent_group_id"]
+          Category.all.each do |potential_parent_category|
+            if potential_parent_category.custom_fields["import_group_id"] == category.custom_fields["import_parent_group_id"]
+              byebug
+              category.parent_category_id = potential_parent_category.id
+            end
+          end
+        end
+      end
     end
   end
 
