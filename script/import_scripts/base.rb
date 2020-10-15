@@ -431,11 +431,11 @@ class ImportScripts::Base
         params[:name] = params[:name][0..49]
 
         # make sure categories don't go more than 2 levels deep
-        if params[:parent_category_id]
-          top = Category.find_by_id(params[:parent_category_id])
-          top = top.parent_category while top && !top.parent_category.nil?
-          params[:parent_category_id] = top.id if top
-        end
+        # if params[:parent_category_id]
+        #   top = Category.find_by_id(params[:parent_category_id])
+        #   top = top.parent_category while top && !top.parent_category.nil?
+        #   params[:parent_category_id] = top.id if top
+        # end
 
         new_category = create_category(params, params[:id])
         created_category(new_category)

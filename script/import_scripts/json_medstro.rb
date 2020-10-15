@@ -94,6 +94,8 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       subset.push(top_level)
     end
 
+    puts subset
+
     subset
   end
 
