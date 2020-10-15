@@ -235,7 +235,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     puts "", "Found #{eligible.count} Eligible Parent Categories so far"
 
     @imported_discussion_json.each do |child_category|
-      if eligible.include?(child_category['group_id'].to_s)
+      if eligible.include?(child_category['group_id'])
         child = Hash.new
         child['id'] = child_category['id']
         child['parent_group_id'] = child_category['group_id']
