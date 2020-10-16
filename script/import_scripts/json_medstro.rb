@@ -185,36 +185,39 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         updated_at: Time.now,
         post_create_action: proc do |newuser|
           add_user_to_groups(newuser, u['group_ids'])
-
+          upload_avatar(newuser,u['id'])
           puts newuser.id.to_s
           puts u['id'].to_s
-          png_path = JSON_FILE_DIRECTORY + USER_AVATAR_DIRECTORY + u['id'].to_s + '.png'
-          jpg_path = JSON_FILE_DIRECTORY + USER_AVATAR_DIRECTORY + u['id'].to_s + '.jpg'
-          if File.exists?(png_path)
-            upload = create_upload(newuser.id, png_path, File.basename(png_path))
-            puts upload.to_s
-            if upload.nil?
-              puts "Upload failed. Path #{png_path} Id New #{newuser.id}"
-            else
-              puts "Upload succeeded. Path #{png_path} Id New #{newuser.id}  Upload Id #{upload.id} "
-              newuser.create_user_avatar
-              newuser.user_avatar.update(custom_upload_id: upload.id)
-              newuser.update(uploaded_avatar_id: upload.id)
-            end
-          elsif File.exists?(jpg_path)
-            upload = create_upload(newuser.id, jpg_path, File.basename(jpg_path))
-            puts upload.to_s
-            if upload.nil?
-              puts "Upload failed. Path #{jpg_path} Id New #{newuser.id}"
-            else
-              puts "Upload succeeded. Path #{jpg_path} Id New #{newuser.id}  Upload Id #{upload.id} "
-              newuser.create_user_avatar
-              newuser.user_avatar.update(custom_upload_id: upload.id)
-              newuser.update(uploaded_avatar_id: upload.id)
-            end
-          end
         end
       }
+    end
+  end
+
+  def upload_avatar (newuser,import_user_id)
+    base_path = JSON_FILE_DIRECTORY + USER_AVATAR_DIRECTORY + import_user_id.to_s
+    png_path = base_path + '.png'
+    jpg_path = base_path + '.jpg'
+    upload = nil
+    possible_paths = [png_path, jpg_path]
+    possible_paths.each do |path|
+      if File.exists?(path)
+        upload = create_upload(newuser.id, path, File.basename(path))
+        puts upload.to_s
+        if upload.nil?
+          puts "Upload failed. Path #{path} Id New #{newuser.id}"
+        else
+          puts "Upload succeeded. Path #{path} Id New #{newuser.id}  Upload Id #{upload.id} "
+        end
+        break
+      end
+    end
+    if !upload.nil?
+      newuser.create_user_avatar
+      newuser.user_avatar.update(custom_upload_id: upload.id)
+      newuser.update(uploaded_avatar_id: upload.id)
+      puts "Avatar created for User #{newuser.id}  Upload Id #{upload.id} "
+    else
+      puts "No Avatar found for User #{newuser.id}"
     end
   end
 
