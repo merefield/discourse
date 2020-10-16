@@ -14,6 +14,8 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
   JSON_USER_EXTRAS_FILE = 'users_additional_info.json'
   USER_AVATAR_DIRECTORY = 'user_avatars/'
   GROUP_AVATAR_DIRECTORY = 'group_avatars/'
+  CATEGORY_LOGO_DIRECTORY = 'group_avatars/'
+  CATEGORY_BACKGROUND_DIRECTORY = 'group_banners/'
   JSON_FILE_DIRECTORY = '/shared/import/data/ama-pin-transfer/'
   BATCH_SIZE ||= 1000
 
@@ -61,7 +63,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     additional = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_USER_EXTRAS_FILE))
     
     mrg = []
-    master.first(50).each do |master_record|
+    master.first(20).each do |master_record|
       additional.each do |additional_record|
         if additional_record['user_id'] == master_record['id']
           mrg.push(master_record.merge(additional_record))
@@ -126,8 +128,6 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
     groups.uniq!
 
-    puts groups[0]
-
     create_groups(groups) do |g|
       {
         id: g['id'],
@@ -169,9 +169,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     end
     users.uniq!
 
-    puts users[0]
-
-    create_users(users.first(15)) do |u|
+    create_users(users.first(20)) do |u|
       {
         id: u['id'],
         username: u['shortname'],
@@ -212,8 +210,6 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       end
     end
     if !upload.nil?
-      newuser.create_user_avatar
-      newuser.user_avatar.update(custom_upload_id: upload.id)
       newuser.update(uploaded_avatar_id: upload.id)
       puts "Avatar created for User #{newuser.id}  Upload Id #{upload.id} "
     else
@@ -253,8 +249,6 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
     categories.uniq!
 
-    puts categories
-
     puts "", "Found #{categories.count} Categories"
 
     create_categories(categories) do |gd|
@@ -265,6 +259,8 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         created_at: Time.now,
         updated_at: Time.now,
         post_create_action: proc do |newcategory|
+          upload_category_logo(newcategory,gd['id'])
+          upload_category_background(newcategory,gd['id'])
           newcategory.custom_fields["import_group_id"] = gd['id'].to_s
           newcategory.custom_fields["import_parent_group_id"] = gd['parent_group_id'].to_s
           newcategory.save!
@@ -274,6 +270,52 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         h[:parent_category_id] = category_id_from_imported_category_id(gd['parent_group_id'])
       end
       h
+    end
+  end
+
+  def upload_category_logo (newcategory,import_group_id)
+    base_path = JSON_FILE_DIRECTORY + CATEGORY_LOGO_DIRECTORY + import_group_id.to_s
+    path = base_path + '.png'
+    upload = nil
+
+    if File.exists?(path)
+      upload = create_upload(newcategory.id, path, File.basename(path))
+      puts upload.to_s
+      if upload.nil?
+        puts "Upload failed. Path #{path} Id New #{newcategory.id}"
+      else
+        puts "Upload succeeded. Path #{path} Id New #{newcategory.id}  Upload Id #{upload.id} "
+      end
+    end
+
+    if !upload.nil?
+      newcategory.update(uploaded_logo_id: upload.id)
+      puts "Logo created for Category #{newcategory.id}  Upload Id #{newcategory.id} "
+    else
+      puts "No logo found for Category #{newcategory.id}"
+    end
+  end
+
+  def upload_category_background (newcategory,import_group_id)
+    base_path = JSON_FILE_DIRECTORY + CATEGORY_BACKGROUND_DIRECTORY + import_group_id.to_s
+    path = base_path + '.jpg'
+    upload = nil
+
+    if File.exists?(path)
+      upload = create_upload(newcategory.id, path, File.basename(path))
+      puts upload.to_s
+      if upload.nil?
+        puts "Upload failed. Path #{path} Id New #{newcategory.id}"
+      else
+        puts "Upload succeeded. Path #{path} Id New #{newcategory.id}  Upload Id #{upload.id} "
+      end
+    end
+
+    if !upload.nil?
+      newcategory.update(uploaded_background_id: upload.id)
+      puts "Background created for Category #{newcategory.id}  Upload Id #{upload.id} "
+    else
+      puts "No Background found for Category #{newcategory.id}"
     end
   end
 
