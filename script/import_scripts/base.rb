@@ -141,6 +141,7 @@ class ImportScripts::Base
     group_id_from_imported_group_id
     post_already_imported?
     post_id_from_imported_post_id
+    topic_id_from_imported_topic_id
     topic_lookup_from_imported_post_id
     user_already_imported?
     user_id_from_imported_user_id
@@ -555,29 +556,32 @@ class ImportScripts::Base
   STAFF_GUARDIAN ||= Guardian.new(Discourse.system_user)
 
   def create_post(opts, import_id)
-    user = User.find(opts[:user_id])
-    post_create_action = opts.delete(:post_create_action)
-    opts = opts.merge(skip_validations: true)
-    opts[:import_mode] = true
-    opts[:custom_fields] ||= {}
-    opts[:custom_fields]['import_id'] = import_id
+    user = User.where("id = #{opts[:user_id]}").first
+    if !user.nil?
+      if opts[:is_op] || (!opts[:is_op] && opts[:topic_id])
+        post_create_action = opts.delete(:post_create_action)
+        opts = opts.merge(skip_validations: true)
+        opts[:import_mode] = true
+        opts[:custom_fields] ||= {}
 
-    unless opts[:topic_id]
-      opts[:meta_data] = meta_data = {}
-      meta_data["import_closed"] = true if opts[:closed]
-      meta_data["import_archived"] = true if opts[:archived]
-      meta_data["import_topic_id"] = opts[:import_topic_id] if opts[:import_topic_id]
+        unless opts[:topic_id]
+          opts[:meta_data] = meta_data = {}
+          meta_data["import_closed"] = true if opts[:closed]
+          meta_data["import_archived"] = true if opts[:archived]
+          meta_data["import_topic_id"] = opts[:custom_fields][:import_topic_id] if opts[:custom_fields][:import_topic_id]
+        end
+
+        opts[:guardian] = STAFF_GUARDIAN
+        if @bbcode_to_md
+          opts[:raw] = opts[:raw].bbcode_to_md(false, {}, :disable, :quote) rescue opts[:raw]
+        end
+
+        post_creator = PostCreator.new(user, opts)
+        post = post_creator.create
+        post_create_action.try(:call, post) if post
+        post && post_creator.errors.empty? ? post : post_creator.errors.full_messages
+      end
     end
-
-    opts[:guardian] = STAFF_GUARDIAN
-    if @bbcode_to_md
-      opts[:raw] = opts[:raw].bbcode_to_md(false, {}, :disable, :quote) rescue opts[:raw]
-    end
-
-    post_creator = PostCreator.new(user, opts)
-    post = post_creator.create
-    post_create_action.try(:call, post) if post
-    post && post_creator.errors.empty? ? post : post_creator.errors.full_messages
   end
 
   def create_upload(user_id, path, source_filename)

@@ -16,19 +16,24 @@ module ImportScripts
       @posts = PostCustomField.where(name: 'import_id').pluck(:value, :post_id).to_h
 
       puts 'Loading existing topics...'
-      @topics = {}
-      Post.joins(:topic).pluck('posts.id, posts.topic_id, posts.post_number, topics.slug').each do |p|
-        @topics[p[0]] = {
-          topic_id: p[1],
-          post_number: p[2],
-          url: Post.url(p[3], p[1], p[2])
-        }
-      end
+      @topics = TopicCustomField.where(name: 'import_id').pluck(:value, :topic_id).to_h
+      # @topics = {}
+      # Post.joins(:topic).pluck('posts.id, posts.topic_id, posts.post_number, topics.slug').each do |p|
+      #   @topics[p[0]] = {
+      #     topic_id: p[1],
+      #     post_number: p[2],
+      #     url: Post.url(p[3], p[1], p[2])
+      #   }
+      # end
     end
 
     # Get the Discourse Post id based on the id of the source record
     def post_id_from_imported_post_id(import_id)
       @posts[import_id] || @posts[import_id.to_s]
+    end
+
+    def topic_id_from_imported_topic_id(import_id)
+      @topics[import_id] || @topics[import_id.to_s]
     end
 
     # Get the Discourse topic info (a hash) based on the id of the source record
@@ -78,13 +83,17 @@ module ImportScripts
       @posts[import_id.to_s] = post.id
     end
 
-    def add_topic(post)
-      @topics[post.id] = {
-        post_number: post.post_number,
-        topic_id: post.topic_id,
-        url: post.url,
-      }
+    def add_topic(import_id, post)
+      @topics[import_id.to_s] = post.topic_id
     end
+
+    # def add_topic(post)
+    #   @topics[post.id] = {
+    #     post_number: post.post_number,
+    #     topic_id: post.topic_id,
+    #     url: post.url,
+    #   }
+    # end
 
     def user_already_imported?(import_id)
       @users.has_key?(import_id) || @users.has_key?(import_id.to_s)

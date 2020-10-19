@@ -10,6 +10,8 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
   JSON_FILE_PATH = ENV['JSON_FILE']
   JSON_USER_FILE = 'users.json'
   JSON_GROUP_FILE = 'groups.json'
+  JSON_TOPIC_FILE = 'posts.json'
+  JSON_POST_FILE = 'comments.json'
   JSON_DISCUSSION_FILE = 'discussions.json'
   JSON_USER_EXTRAS_FILE = 'users_additional_info.json'
   USER_AVATAR_DIRECTORY = 'user_avatars/'
@@ -30,6 +32,11 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     @imported_group_json = load_group_json
     puts "", "Importing Discussion JSON ..."
     @imported_discussion_json = load_discussion_json
+    puts "", "Importing Topics JSON ..."
+    @imported_topic_json = load_topic_json
+    puts "", "Importing Posts JSON ..."
+    @imported_post_json = load_post_json
+
   end
 
   def reset_instance
@@ -40,6 +47,9 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     User.where("id > 1").destroy_all
     puts "", "Scrubbing Groups..."
     Group.where("automatic = FALSE").destroy_all
+    puts "", "Scrubbing Topics..."
+    Topic.destroy_all
+    Post.destroy_all
   end
 
   def execute
@@ -48,7 +58,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     import_groups
     import_users
     import_categories
-    #import_topics
+    import_topics
     #import_posts
     #add_moderators
     #add_admins
@@ -63,7 +73,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     additional = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_USER_EXTRAS_FILE))
     
     mrg = []
-    master.first(20).each do |master_record|
+    master.first(100).each do |master_record|
       additional.each do |additional_record|
         if additional_record['user_id'] == master_record['id']
           mrg.push(master_record.merge(additional_record))
@@ -103,6 +113,14 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
   def load_discussion_json
     JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_DISCUSSION_FILE))
+  end
+
+  def load_topic_json
+    JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_TOPIC_FILE))
+  end
+
+  def load_post_json
+    JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_POST_FILE))
   end
 
   def username_for(name)
@@ -227,6 +245,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     puts "", "Importing Categories"
 
     @imported_group_json.each do |category|
+      category['is_discussion'] = false
       categories.push(category)
       eligible.push(category['id'])
     end
@@ -237,6 +256,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       if eligible.include?(child_category['group_id'])
         child = Hash.new
         child['id'] = child_category['id']
+        child['is_discussion'] = true
         child['parent_group_id'] = child_category['group_id']
         child['name'] =  child_category['title']
         child['description'] = child_category['description']
@@ -253,7 +273,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
     create_categories(categories) do |gd|
       h = {
-        id: gd['id'],
+        id: gd['is_discussion'] ? gd['id'] + 1000: gd['id'],
         name: gd['name'],
         description: gd['description'],
         created_at: Time.now,
@@ -319,43 +339,50 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     end
   end
 
-  def import_discussions
+  def import_topics
     puts "", "Importing discussions"
 
     topics = 0
     posts = 0
 
-    @imported_json['topics'].each do |t|
-      first_post = t['posts'][0]
-      next unless first_post
+    @imported_topic_json.first(200).each do |t|
+      #first_post = t['posts'][0]
+      #next unless first_post
 
       topic = {
-        id: t["id"],
-        user_id: user_id_from_imported_user_id(username_for(first_post["author"])) || -1,
-        raw: first_post["body"],
-        created_at: Time.zone.parse(first_post["date"]),
+        id: t['id'],
+        is_op: true,
+        user_id: user_id_from_imported_user_id(t['user_id']) || -1,
+        raw: t['body'],
+        created_at: t['created'],
+        updated_at: t['updated'],
         cook_method: Post.cook_methods[:raw_html],
         title: t['title'],
-        category: ENV['CATEGORY_ID'],
-        custom_fields: { import_id: "pid:#{first_post['id']}" }
+        category: category_id_from_imported_category_id(t['group_id'] || (t['discussion_id'] + 1000)),
+        custom_fields: { import_id: t['id'] }
       }
 
-      topic[:pinned_at] = Time.zone.parse(first_post["date"]) if t['pinned']
+      #topic[:pinned_at] = Time.zone.parse(first_post["date"]) if t['pinned']
       topics += 1
+      posts += 1
       parent_post = create_post(topic, topic[:id])
+      add_topic(t['id'], parent_post) if parent_post
+    end
 
-      t['posts'][1..-1].each do |p|
-        create_post({
-          id: p["id"],
-          topic_id: parent_post.topic_id,
-          user_id: user_id_from_imported_user_id(username_for(p["author"])) || -1,
-          raw: p["body"],
-          created_at: Time.zone.parse(p["date"]),
-          cook_method: Post.cook_methods[:raw_html],
-          custom_fields: { import_id: "pid:#{p['id']}" }
-        }, p['id'])
-        posts += 1
-      end
+    @imported_post_json.first(500).each do |p|
+      create_post({
+        id: p["id"],
+        is_op: false,
+        topic_id: topic_id_from_imported_topic_id(p["post_id"]),
+        user_id: user_id_from_imported_user_id((p["user_id"])) || -1,
+        title: p['title'],
+        raw: p['body'],
+        created_at: p['created'],
+        updated_at: p['updated'],
+        cook_method: Post.cook_methods[:raw_html],
+        custom_fields: { import_topic_id: p['post_id'], import_id: p['id'] }
+      }, p['id'])
+      posts += 1
     end
 
     puts "", "Imported #{topics} topics with #{topics + posts} posts."
