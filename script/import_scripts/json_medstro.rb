@@ -392,17 +392,16 @@ end
 def add_user_to_groups(user, imported_groups)
   puts "", "adding user #{user.id} to groups..."
 
-  GroupUser.transaction do
-    GroupUser.where("user_id = #{user.id}").each do |group_user|
-      if !Group.find_by(id: group_user.group_id).automatic
-        group_user.delete
-      end
+  GroupUser.where("user_id = #{user.id}").each do |group_user|
+    if !Group.find_by(id: group_user.group_id).automatic
+      group_user.delete
     end
-    imported_groups.each do |mgid|
-      (group_id = group_id_from_imported_group_id(mgid)) &&
-        GroupUser.find_or_create_by(user: user, group_id: group_id) &&
-      Group.reset_counters(group_id, :group_users)
-    end
+  end
+
+  imported_groups.each do |mgid|
+    (group_id = group_id_from_imported_group_id(mgid)) &&
+      GroupUser.find_or_create_by(user: user, group_id: group_id) &&
+    Group.reset_counters(group_id, :group_users)
   end
 end
 

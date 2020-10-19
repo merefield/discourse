@@ -3,28 +3,12 @@
 module ImportScripts
   class LookupContainer
     def initialize
-      puts 'Loading existing groups...'
-      @groups = GroupCustomField.where(name: 'import_id').pluck(:value, :group_id).to_h
-
-      puts 'Loading existing users...'
-      @users = UserCustomField.where(name: 'import_id').pluck(:value, :user_id).to_h
-
-      puts 'Loading existing categories...'
-      @categories = CategoryCustomField.where(name: 'import_id').pluck(:value, :category_id).to_h
-
-      puts 'Loading existing posts...'
-      @posts = PostCustomField.where(name: 'import_id').pluck(:value, :post_id).to_h
-
-      puts 'Loading existing topics...'
-      @topics = TopicCustomField.where(name: 'import_id').pluck(:value, :topic_id).to_h
-      # @topics = {}
-      # Post.joins(:topic).pluck('posts.id, posts.topic_id, posts.post_number, topics.slug').each do |p|
-      #   @topics[p[0]] = {
-      #     topic_id: p[1],
-      #     post_number: p[2],
-      #     url: Post.url(p[3], p[1], p[2])
-      #   }
-      # end
+      puts "", "Resetting import maps"
+      @groups = {}
+      @users = {}
+      @categories = {}
+      @posts = {}
+      @topics = {}
     end
 
     # Get the Discourse Post id based on the id of the source record
@@ -86,14 +70,6 @@ module ImportScripts
     def add_topic(import_id, post)
       @topics[import_id.to_s] = post.topic_id
     end
-
-    # def add_topic(post)
-    #   @topics[post.id] = {
-    #     post_number: post.post_number,
-    #     topic_id: post.topic_id,
-    #     url: post.url,
-    #   }
-    # end
 
     def user_already_imported?(import_id)
       @users.has_key?(import_id) || @users.has_key?(import_id.to_s)
