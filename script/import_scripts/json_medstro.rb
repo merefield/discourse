@@ -12,6 +12,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
   JSON_GROUP_FILE = 'groups.json'
   JSON_TOPIC_FILE = 'posts.json'
   JSON_POST_FILE = 'comments.json'
+  JSON_MESSAGE_FILE = 'messages.json'
   JSON_DISCUSSION_FILE = 'discussions.json'
   JSON_USER_EXTRAS_FILE = 'users_additional_info.json'
   USER_AVATAR_DIRECTORY = 'user_avatars/'
@@ -36,6 +37,8 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     @imported_topic_json = load_topic_json
     puts "", "Importing Posts JSON ..."
     @imported_post_json = load_post_json
+    puts "", "Importing Messages JSON ..."
+    @imported_message_json = load_message_json
 
   end
 
@@ -59,7 +62,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     import_users
     import_categories
     import_topics
-    #import_posts
+    import_messages
     #add_moderators
     #add_admins
     #import_avatars
@@ -121,6 +124,10 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
   def load_post_json
     JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_POST_FILE))
+  end
+
+  def load_message_json
+    JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_MESSAGE_FILE))
   end
 
   def username_for(name)
@@ -399,6 +406,38 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     end
 
     puts "", "Imported #{topics} topics with #{topics + posts} posts."
+  end
+
+  def import_messages
+    puts "", "Importing messages"
+
+    messages = 0
+
+    @imported_message_json.first(100).each do |m|
+      if m['sender_type'] == "User" &&
+        m['recipient_type'] == "User" &&
+        user_id_from_imported_user_id(m['sender_id']) &&
+        user_id_from_imported_user_id(m['recipient_id'])
+        topic = {
+          id: m['id'],
+          archetype: Archetype.private_message,
+          user_id: user_id_from_imported_user_id(m['sender_id']) || -1,
+          target_usernames: User.find_by(id: user_id_from_imported_user_id(m['recipient_id']) || -1).pluck(:username),
+          raw: m['body'],
+          created_at: m['sent'],
+          updated_at: m['sent'],
+          cook_method: Post.cook_methods[:raw_html],
+          title: m['title'],
+          custom_fields: { import_id: t['id'] }
+        }
+
+        message = create_post(topic, topic[:id])
+        messages += 1 if message
+        add_topic(m['id'], message) if message
+      end
+    end
+
+    puts "", "Imported #{messages} messages"
   end
 
   def add_user_to_groups(user, imported_groups)
