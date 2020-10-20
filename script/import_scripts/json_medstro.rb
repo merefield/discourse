@@ -345,7 +345,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     topics = 0
     posts = 0
 
-    @imported_topic_json.first(200).each do |t|
+    @imported_topic_json.first(100).each do |t|
       #first_post = t['posts'][0]
       #next unless first_post
 
@@ -367,11 +367,18 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       posts += 1
       parent_post = create_post(topic, topic[:id])
       add_topic(t['id'], parent_post) if parent_post
+
+      if !t['attached_image_id'].blank?
+        attach_media_to_post(parent_post, t['id'], 'post', 'attached_images', t['attached_image_id'])
+      end
+      if !t['media_upload_id'].blank?
+        attach_media_to_post(parent_post, t['id'], 'post', 'media_uploads', t['media_upload_id'])
+      end
     end
 
-    @imported_post_json.first(500).each do |p|
-      create_post({
-        id: p["id"],
+    @imported_post_json.first(300).each do |p|
+      new_post = create_post({
+        id: p['id'],
         is_op: false,
         topic_id: topic_id_from_imported_topic_id(p["post_id"]),
         user_id: user_id_from_imported_user_id((p["user_id"])) || -1,
@@ -383,25 +390,71 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         custom_fields: { import_topic_id: p['post_id'], import_id: p['id'] }
       }, p['id'])
       posts += 1
+      if !p['attached_image_id'].blank?
+        attach_media_to_post(new_post, p['id'], 'comment', 'attached_images', p['attached_image_id'])
+      end
+      if !p['media_upload_id'].blank?
+        attach_media_to_post(new_post, p['id'], 'comment', 'media_uploads', p['media_upload_id'])
+      end
     end
 
     puts "", "Imported #{topics} topics with #{topics + posts} posts."
   end
-end
 
-def add_user_to_groups(user, imported_groups)
-  puts "", "adding user #{user.id} to groups..."
+  def add_user_to_groups(user, imported_groups)
+    puts "", "adding user #{user.id} to groups..."
 
-  GroupUser.where("user_id = #{user.id}").each do |group_user|
-    if !Group.find_by(id: group_user.group_id).automatic
-      group_user.delete
+    GroupUser.where("user_id = #{user.id}").each do |group_user|
+      if !Group.find_by(id: group_user.group_id).automatic
+        group_user.delete
+      end
+    end
+
+    imported_groups.each do |mgid|
+      (group_id = group_id_from_imported_group_id(mgid)) &&
+        GroupUser.find_or_create_by(user: user, group_id: group_id) &&
+      Group.reset_counters(group_id, :group_users)
     end
   end
 
-  imported_groups.each do |mgid|
-    (group_id = group_id_from_imported_group_id(mgid)) &&
-      GroupUser.find_or_create_by(user: user, group_id: group_id) &&
-    Group.reset_counters(group_id, :group_users)
+  def attach_media_to_post(post, import_post_id, level, type, media_id)
+    base_path = JSON_FILE_DIRECTORY + level + '_' + type + '/' + media_id.to_s
+    png_path = base_path + '.png'
+    jpg_path = base_path + '.jpg'
+    pdf_path = base_path + '.pdf'
+    ppt_path = base_path + '.ppt'
+    pptx_path = base_path + '.pptx'
+    doc_path = base_path + '.doc'
+    docx_path = base_path + '.docx'
+    xls_path = base_path + '.xls'
+    xlsx_path = base_path + '.xlsx'
+    mp4_path = base_path + '.mp4'
+
+    upload = nil
+    possible_paths =
+    [png_path,jpg_path, pdf_path,
+      ppt_path, pptx_path, doc_path, docx_path, xls_path,
+      xlsx_path, mp4_path, base_path]
+    possible_paths.each do |path|
+      if File.exists?(path)
+        upload = create_upload(post.user.id, path, File.basename(path))
+        puts upload.to_s
+        if !upload&.persisted?
+          puts "Upload failed. Path #{path} Id New #{post.user.id}"
+        else
+          html = html_for_upload(upload, File.basename(path))
+          if !post.raw[html]
+            post.raw << "\n\n" << html
+            byebug
+            post.cook_method = 1
+            post.save!
+            PostUpload.create!(post: post, upload: upload) unless PostUpload.where(post: post, upload: upload).exists?
+          end
+          puts "Post upload succeeded. Path #{path} Id New #{post.user.id}  Upload Id #{upload.id} "
+        end
+        break
+      end
+    end
   end
 end
 
