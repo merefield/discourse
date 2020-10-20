@@ -390,10 +390,10 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         custom_fields: { import_topic_id: p['post_id'], import_id: p['id'] }
       }, p['id'])
       posts += 1
-      if !p['attached_image_id'].blank?
+      if !p['attached_image_id'].blank? && new_post
         attach_media_to_post(new_post, p['id'], 'comment', 'attached_images', p['attached_image_id'])
       end
-      if !p['media_upload_id'].blank?
+      if !p['media_upload_id'].blank? && new_post
         attach_media_to_post(new_post, p['id'], 'comment', 'media_uploads', p['media_upload_id'])
       end
     end
@@ -437,20 +437,19 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       xlsx_path, mp4_path, base_path]
     possible_paths.each do |path|
       if File.exists?(path)
-        upload = create_upload(post.user.id, path, File.basename(path))
+        upload = create_upload(post.user.id || -1, path, File.basename(path))
         puts upload.to_s
         if !upload&.persisted?
-          puts "Upload failed. Path #{path} Id New #{post.user.id}"
+          puts "Upload failed. Path #{path} For User Id #{post.user.id}"
         else
           html = html_for_upload(upload, File.basename(path))
           if !post.raw[html]
             post.raw << "\n\n" << html
-            byebug
             post.cook_method = 1
             post.save!
             PostUpload.create!(post: post, upload: upload) unless PostUpload.where(post: post, upload: upload).exists?
           end
-          puts "Post upload succeeded. Path #{path} Id New #{post.user.id}  Upload Id #{upload.id} "
+          puts "Post upload succeeded. Path #{path} for User Id #{post.user.id || -1}  Upload Id #{upload.id} "
         end
         break
       end
