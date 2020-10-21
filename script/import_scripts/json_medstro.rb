@@ -102,7 +102,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     subset = []
     top_level = []
     master.each do |master_record|
-      if master_record['parent_group_id'] == 203 #|| master_record['id'] == 203
+      if master_record['parent_group_id'] == 203
         top_level.push(master_record)
       end
     end
@@ -113,7 +113,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
     master.each do |master_record|
       top_level.each do |top_level|
-        if master_record['parent_group_id'] == top_level['id'] #|| master_record['id'] == 203
+        if master_record['parent_group_id'] == top_level['id']
           subset.push(master_record)
         end
       end
@@ -171,7 +171,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         bio_raw: g['description'],
         visibility_level: g['private'] ? 3 : 1,
         members_visibility_level: g['private'] ? 3 : 1,
-        created_at: Time.now, #g['joined'],
+        created_at: Time.now,
         updated_at: Time.now,
         post_create_action: proc do |newgroup|
           puts newgroup.id.to_s
