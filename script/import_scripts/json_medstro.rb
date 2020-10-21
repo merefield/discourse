@@ -86,7 +86,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     additional = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_USER_EXTRAS_FILE))
     
     mrg = []
-    master.first(500).each do |master_record|
+    master.first(100).each do |master_record|
       additional.each do |additional_record|
         if additional_record['user_id'] == master_record['id']
           mrg.push(master_record.merge(additional_record))
@@ -204,7 +204,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     end
     users.uniq!
 
-    create_users(users.first(200)) do |u|
+    create_users(users.first(100)) do |u|
       {
         id: u['id'],
         username: u['shortname'],
@@ -301,6 +301,19 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
           newcategory.custom_fields["import_group_id"] = gd['id'].to_s
           newcategory.custom_fields["import_parent_group_id"] = gd['parent_group_id'].to_s
           newcategory.save!
+          group_permission = CategoryGroup.new
+          group_permission.category_id = newcategory.id
+          if gd['is_discussion']
+             group_permission.group_id = CategoryGroup.find_by(category_id: newcategory.parent_category_id).group_id
+          else
+            if GroupCustomField.find_by(value: gd['id'].to_s, name: "import_id").nil?
+              group_permission.group_id = CategoryGroup.find_by(category_id: newcategory.parent_category_id).group_id
+            else
+              group_permission.group_id = GroupCustomField.find_by(value: gd['id'].to_s, name: "import_id").group_id
+            end
+          end
+          group_permission.permission_type = 1
+          group_permission.save!
         end
       }
       if gd['parent_group_id'].to_i > 0 && gd['parent_group_id'].to_i != 203
@@ -362,7 +375,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     topics = 0
     posts = 0
 
-    @imported_topic_json.first(100).each do |t|
+    @imported_topic_json.first(200).each do |t|
       #first_post = t['posts'][0]
       #next unless first_post
 
@@ -393,7 +406,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       end
     end
 
-    @imported_post_json.first(300).each do |p|
+    @imported_post_json.first(500).each do |p|
       new_post = create_post({
         id: p['id'],
         is_op: false,
@@ -423,7 +436,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
     messages = 0
 
-    @imported_message_json.first(1000).each do |m|
+    @imported_message_json.first(500).each do |m|
       if m['sender_type'] == "User" &&
         m['recipient_type'] == "User" &&
         user_id_from_imported_user_id(m['sender_id']) &&
