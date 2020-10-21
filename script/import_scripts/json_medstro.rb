@@ -45,14 +45,24 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
   def reset_instance
     puts "", "Scrubbing..."
     puts "", "Scrubbing Categories..."
-    Category.where("id > 4").destroy_all
+    Category.where("id > 4").find_each do |category|
+      category.destroy
+    end
     puts "", "Scrubbing Users..."
-    User.where("id > 1").destroy_all
+    User.where("id > 1").find_each do |user|
+      user.destroy
+    end
     puts "", "Scrubbing Groups..."
-    Group.where("automatic = FALSE").destroy_all
+    Group.where("automatic = FALSE").find_each do |group|
+      group.destroy
+    end
     puts "", "Scrubbing Topics..."
-    Topic.destroy_all
-    Post.destroy_all
+    Topic.find_each do |topic|
+      topic.destroy
+    end
+    Post.find_each do |post|
+      post.destroy
+    end
   end
 
   def execute
@@ -76,7 +86,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     additional = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_USER_EXTRAS_FILE))
     
     mrg = []
-    master.first(100).each do |master_record|
+    master.first(500).each do |master_record|
       additional.each do |additional_record|
         if additional_record['user_id'] == master_record['id']
           mrg.push(master_record.merge(additional_record))
@@ -194,7 +204,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     end
     users.uniq!
 
-    create_users(users.first(20)) do |u|
+    create_users(users.first(200)) do |u|
       {
         id: u['id'],
         username: u['shortname'],
@@ -413,22 +423,24 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
     messages = 0
 
-    @imported_message_json.first(100).each do |m|
+    @imported_message_json.first(1000).each do |m|
       if m['sender_type'] == "User" &&
         m['recipient_type'] == "User" &&
         user_id_from_imported_user_id(m['sender_id']) &&
         user_id_from_imported_user_id(m['recipient_id'])
+        
         topic = {
           id: m['id'],
+          is_op: true,
           archetype: Archetype.private_message,
           user_id: user_id_from_imported_user_id(m['sender_id']) || -1,
-          target_usernames: User.find_by(id: user_id_from_imported_user_id(m['recipient_id']) || -1).pluck(:username),
+          target_usernames: [User.find_by(id: user_id_from_imported_user_id(m['recipient_id']) || -1).username],
           raw: m['body'],
           created_at: m['sent'],
           updated_at: m['sent'],
           cook_method: Post.cook_methods[:raw_html],
-          title: m['title'],
-          custom_fields: { import_id: t['id'] }
+          title: HtmlToMarkdown.new(m['body'][0..20] + '...').to_markdown,
+          custom_fields: { import_id: m['id'] }
         }
 
         message = create_post(topic, topic[:id])
