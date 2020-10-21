@@ -376,8 +376,6 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     posts = 0
 
     @imported_topic_json.first(200).each do |t|
-      #first_post = t['posts'][0]
-      #next unless first_post
 
       topic = {
         id: t['id'],
@@ -392,7 +390,6 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         custom_fields: { import_id: t['id'] }
       }
 
-      #topic[:pinned_at] = Time.zone.parse(first_post["date"]) if t['pinned']
       topics += 1
       posts += 1
       parent_post = create_post(topic, topic[:id])
