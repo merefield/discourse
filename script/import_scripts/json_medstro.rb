@@ -86,7 +86,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     additional = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_USER_EXTRAS_FILE))
     
     mrg = []
-    master.first(100).each do |master_record|
+    master.first(5000).each do |master_record|
       additional.each do |additional_record|
         if additional_record['user_id'] == master_record['id']
           mrg.push(master_record.merge(additional_record))
@@ -204,7 +204,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     end
     users.uniq!
 
-    create_users(users.first(100)) do |u|
+    create_users(users.first(5000)) do |u|
       {
         id: u['id'],
         username: u['shortname'],
@@ -375,7 +375,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     topics = 0
     posts = 0
 
-    @imported_topic_json.first(200).each do |t|
+    @imported_topic_json.first(8000).each do |t|
 
       topic = {
         id: t['id'],
@@ -385,7 +385,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         created_at: t['created'],
         updated_at: t['updated'],
         cook_method: Post.cook_methods[:raw_html],
-        title: t['title'],
+        title: t['title'].blank? ? HtmlToMarkdown.new(t['body'][0..20] + '...').to_markdown : t['title'],
         category: category_id_from_imported_category_id(t['group_id'] || (t['discussion_id'] + 1000)),
         custom_fields: { import_id: t['id'] }
       }
@@ -403,7 +403,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       end
     end
 
-    @imported_post_json.first(500).each do |p|
+    @imported_post_json.first(24000).each do |p|
       new_post = create_post({
         id: p['id'],
         is_op: false,
@@ -433,7 +433,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
     messages = 0
 
-    @imported_message_json.first(500).each do |m|
+    @imported_message_json.first(3000).each do |m|
       if m['sender_type'] == "User" &&
         m['recipient_type'] == "User" &&
         user_id_from_imported_user_id(m['sender_id']) &&
