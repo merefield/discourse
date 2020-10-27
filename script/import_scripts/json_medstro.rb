@@ -14,6 +14,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
   JSON_POST_FILE = 'comments.json'
   JSON_MESSAGE_FILE = 'messages.json'
   JSON_DISCUSSION_FILE = 'discussions.json'
+  JSON_ORGANISATION_FILE = 'organizations.json'
   JSON_USER_EXTRAS_FILE = 'users_additional_info.json'
   USER_AVATAR_DIRECTORY = 'user_avatars/'
   GROUP_AVATAR_DIRECTORY = 'group_avatars/'
@@ -45,23 +46,65 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
   def reset_instance
     puts "", "Scrubbing..."
     puts "", "Scrubbing Categories..."
+    total = Category.where("id > 4").count
+    start_time = Time.now
+    done = 0
     Category.where("id > 4").find_each do |category|
       category.destroy
+      done += 1
+      print_status(done, total, start_time)
     end
     puts "", "Scrubbing Users..."
+    total = User.where("id > 1").count
+    start_time = Time.now
+    done = 0
     User.where("id > 1").find_each do |user|
       user.destroy
+      done += 1
+      print_status(done, total, start_time)
     end
     puts "", "Scrubbing Groups..."
+    total = Group.where("automatic = FALSE").count
+    start_time = Time.now
+    done = 0
     Group.where("automatic = FALSE").find_each do |group|
       group.destroy
+      done += 1
+      print_status(done, total, start_time)
     end
     puts "", "Scrubbing Topics..."
+    total = Topic.count
+    start_time = Time.now
+    done = 0
     Topic.find_each do |topic|
       topic.destroy
+      done += 1
+      print_status(done, total, start_time)
     end
+    total = Post.count
+    start_time = Time.now
+    done = 0
     Post.find_each do |post|
       post.destroy
+      done += 1
+      print_status(done, total, start_time)
+    end
+
+    UserField.destroy_all
+
+    @occupation_field = UserField.find_by_name("Occupation")
+    unless @occupation_field
+      @occupation_field = UserField.create(name: "Occupation", description: "Your primary role", field_type: "text", editable: true, required: false, show_on_profile: true, show_on_user_card: true)
+    end
+
+    @organisation_field = UserField.find_by_name("Organization")
+    unless @organisation_field
+      @organisation_field = UserField.create(name: "Organization", description: "Your organization", field_type: "text", editable: true, required: false, show_on_profile: true, show_on_user_card: true)
+    end
+
+    @verified_physician_field = UserField.find_by_name("AMA Verified Physician")
+    unless @verified_physician_field
+      @verified_physician_field = UserField.create(name: "AMA Verified Physician", description: "registered as a Physician with AMA", field_type: "text", editable: true, required: false, show_on_profile: true, show_on_user_card: true)
     end
   end
 
@@ -84,11 +127,17 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
   def load_user_json
     master = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_USER_FILE))
     additional = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_USER_EXTRAS_FILE))
+    organisation = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_ORGANISATION_FILE))
     
     mrg = []
-    master.first(5000).each do |master_record|
+    master.first(100).each do |master_record|
       additional.each do |additional_record|
         if additional_record['user_id'] == master_record['id']
+          organisation.each do |organisation_record|
+            if organisation_record['id'] == additional_record['employment_organization_ids'][0]
+              additional_record['organization_name'] = organisation_record['name']
+            end
+          end
           mrg.push(master_record.merge(additional_record))
         end
       end
@@ -204,14 +253,14 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     end
     users.uniq!
 
-    create_users(users.first(5000)) do |u|
+    create_users(users.first(100)) do |u|
       {
         id: u['id'],
         username: u['shortname'],
         name: (u['title'] + ' ' + u['firstname'] + ' ' + u['middlename'] + ' ' + u['lastname'] + ' ' + u['suffix']).gsub(/ +/, " "),
         email: u['email'],
         location: (u['address_first_line'] + ' ' + u['postal_code'] + ' ' + u['city'] + + ' ' + u['state'] + ' ' + u['country']).gsub(/ +/, " "),
-        website: u['url'].presence || u['linkedin'].presence || u['googleplus'].presence || u['twitter'].presence || u['facebook'].presence || u['tumblr'].presence  || u['pinterest'].presence,
+        website: CGI.escape((u['url'].presence || u['linkedin'].presence || u['googleplus'].presence || u['twitter'].presence || u['facebook'].presence || u['tumblr'].presence  || u['pinterest'].presence) || "" ),
         bio_raw: u['summary'],
         date_of_birth: u['birth_day'].to_s + '/' + u['birth_month'].to_s + '/' +  u['birth_year'].to_s,
         created_at: u['joined'],
@@ -219,6 +268,30 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         post_create_action: proc do |newuser|
           add_user_to_groups(newuser, u['group_ids'])
           upload_avatar(newuser,u['id'])
+          occupation_id = UserField.find_by(name: "Occupation").id
+          occupation_object = UserCustomField.where(name: "user_field_#{occupation_id}", user_id: newuser.id).first
+          if !occupation_object.nil?
+            occupation_object.value = u['employments'][0]
+          else
+            occupation_object = UserCustomField.create(user_id: newuser.id, name: "user_field_#{occupation_id}", value: u['employments'][0])
+          end
+          occupation_object.save!
+          organisation_id = UserField.find_by(name: "Organization").id
+          organisation_object = UserCustomField.where(name: "user_field_#{organisation_id}", user_id: newuser.id).first
+          if !organisation_object.nil?
+            organisation_object.value = u['organization_name']
+          else
+            organisation_object = UserCustomField.create(user_id: newuser.id, name: "user_field_#{organisation_id}", value: u['organization_name'])
+          end
+          organisation_object.save!
+          physician_id = UserField.find_by(name: "AMA Verified Physician").id
+          physician_object = UserCustomField.where(name: "user_field_#{physician_id}", user_id: newuser.id).first
+          if !physician_object.nil?
+            physician_object.value = u['is_physician'] ? "Yes": "No"
+          else
+            physician_object = UserCustomField.create(user_id: newuser.id, name: "user_field_#{physician_id}", value: u['is_physician'] ? "Yes": "No")
+          end
+          physician_object.save!
           puts newuser.id.to_s
           puts u['id'].to_s
         end
@@ -375,35 +448,37 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     topics = 0
     posts = 0
 
-    @imported_topic_json.first(8000).each do |t|
+    @imported_topic_json.first(400).each do |t|
+      #ignore posts with blank discussion id's
+      if !t['discussion_id'].blank?
+        topic = {
+          id: t['id'],
+          is_op: true,
+          user_id: user_id_from_imported_user_id(t['user_id']) || -1,
+          raw: t['body'],
+          created_at: t['created'],
+          updated_at: t['updated'],
+          cook_method: Post.cook_methods[:raw_html],
+          title: t['title'].blank? ? HtmlToMarkdown.new(t['body'][0..20] + '...').to_markdown : t['title'],
+          category: category_id_from_imported_category_id(t['group_id'] || (t['discussion_id'] + 1000)),
+          custom_fields: { import_id: t['id'] }
+        }
 
-      topic = {
-        id: t['id'],
-        is_op: true,
-        user_id: user_id_from_imported_user_id(t['user_id']) || -1,
-        raw: t['body'],
-        created_at: t['created'],
-        updated_at: t['updated'],
-        cook_method: Post.cook_methods[:raw_html],
-        title: t['title'].blank? ? HtmlToMarkdown.new(t['body'][0..20] + '...').to_markdown : t['title'],
-        category: category_id_from_imported_category_id(t['group_id'] || (t['discussion_id'] + 1000)),
-        custom_fields: { import_id: t['id'] }
-      }
+        topics += 1
+        posts += 1
+        parent_post = create_post(topic, topic[:id])
+        add_topic(t['id'], parent_post) if parent_post
 
-      topics += 1
-      posts += 1
-      parent_post = create_post(topic, topic[:id])
-      add_topic(t['id'], parent_post) if parent_post
-
-      if !t['attached_image_id'].blank?
-        attach_media_to_post(parent_post, t['id'], 'post', 'attached_images', t['attached_image_id'])
-      end
-      if !t['media_upload_id'].blank?
-        attach_media_to_post(parent_post, t['id'], 'post', 'media_uploads', t['media_upload_id'])
+        if !t['attached_image_id'].blank?
+          attach_media_to_post(parent_post, t['id'], 'post', 'attached_images', t['attached_image_id'])
+        end
+        if !t['media_upload_id'].blank?
+          attach_media_to_post(parent_post, t['id'], 'post', 'media_uploads', t['media_upload_id'])
+        end
       end
     end
 
-    @imported_post_json.first(24000).each do |p|
+    @imported_post_json.first(2400).each do |p|
       new_post = create_post({
         id: p['id'],
         is_op: false,
@@ -433,7 +508,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
     messages = 0
 
-    @imported_message_json.first(3000).each do |m|
+    @imported_message_json.first(300).each do |m|
       if m['sender_type'] == "User" &&
         m['recipient_type'] == "User" &&
         user_id_from_imported_user_id(m['sender_id']) &&
