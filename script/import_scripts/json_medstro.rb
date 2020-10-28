@@ -89,6 +89,15 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       done += 1
       print_status(done, total, start_time)
     end
+    puts "", "Scrubbing Uploads..."
+    total = Upload.where("id > 2").count
+    start_time = Time.now
+    done = 0
+    Upload.where("id > 2").find_each do |upload|
+      upload.destroy
+      done +=1
+      print_status(done, total, start_time)
+    end
 
     UserField.destroy_all
 
@@ -455,10 +464,10 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
           id: t['id'],
           is_op: true,
           user_id: user_id_from_imported_user_id(t['user_id']) || -1,
-          raw: t['body'],
+          raw: clean_up_body(t['body']),
           created_at: t['created'],
           updated_at: t['updated'],
-          cook_method: Post.cook_methods[:raw_html],
+          cook_method: Post.cook_methods[:regular],
           title: t['title'].blank? ? HtmlToMarkdown.new(t['body'][0..20] + '...').to_markdown : t['title'],
           category: category_id_from_imported_category_id(t['group_id'] || (t['discussion_id'] + 1000)),
           custom_fields: { import_id: t['id'] }
@@ -475,6 +484,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         if !t['media_upload_id'].blank?
           attach_media_to_post(parent_post, t['id'], 'post', 'media_uploads', t['media_upload_id'])
         end
+        parent_post.rebake!
       end
     end
 
@@ -485,10 +495,10 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         topic_id: topic_id_from_imported_topic_id(p["post_id"]),
         user_id: user_id_from_imported_user_id((p["user_id"])) || -1,
         title: p['title'],
-        raw: p['body'],
+        raw: clean_up_body(p['body']),
         created_at: p['created'],
         updated_at: p['updated'],
-        cook_method: Post.cook_methods[:raw_html],
+        cook_method: Post.cook_methods[:regular],
         custom_fields: { import_topic_id: p['post_id'], import_id: p['id'] }
       }, p['id'])
       posts += 1
@@ -498,9 +508,34 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       if !p['media_upload_id'].blank? && new_post
         attach_media_to_post(new_post, p['id'], 'comment', 'media_uploads', p['media_upload_id'])
       end
+      new_post.rebake! if new_post
     end
 
     puts "", "Imported #{topics} topics with #{topics + posts} posts."
+  end
+
+  def clean_up_body(raw)
+    doc = Nokogiri::HTML5.fragment(raw)
+
+    matches = doc.css("a")
+
+    matches.each do |match|
+      match.replace(match[:href])
+    end
+
+    matches = doc.css("p")
+
+    matches.each do |match|
+      match.replace(match.children)
+    end
+
+    matches = doc.css("br")
+
+    matches.each do |match|
+      match.replace("\n")
+    end
+
+    doc.to_html
   end
 
   def import_messages
