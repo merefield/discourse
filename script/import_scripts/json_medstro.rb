@@ -45,6 +45,15 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
   def reset_instance
     puts "", "Scrubbing..."
+    scrub_categories
+    scrub_users
+    scrub_groups
+    scrub_topics
+    scrub_uploads
+    reset_user_fields
+  end
+
+  def scrub_categories
     puts "", "Scrubbing Categories..."
     total = Category.where("id > 4").count
     start_time = Time.now
@@ -54,6 +63,9 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       done += 1
       print_status(done, total, start_time)
     end
+  end
+
+  def scrub_users
     puts "", "Scrubbing Users..."
     total = User.where("id > 1").count
     start_time = Time.now
@@ -63,6 +75,9 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       done += 1
       print_status(done, total, start_time)
     end
+  end
+
+  def scrub_groups
     puts "", "Scrubbing Groups..."
     total = Group.where("automatic = FALSE").count
     start_time = Time.now
@@ -72,6 +87,9 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       done += 1
       print_status(done, total, start_time)
     end
+  end
+
+  def scrub_topics
     puts "", "Scrubbing Topics..."
     total = Topic.count
     start_time = Time.now
@@ -89,6 +107,9 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       done += 1
       print_status(done, total, start_time)
     end
+  end
+
+  def scrub_uploads
     puts "", "Scrubbing Uploads..."
     total = Upload.where("id > 2").count
     start_time = Time.now
@@ -98,7 +119,9 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       done +=1
       print_status(done, total, start_time)
     end
+  end
 
+  def reset_user_fields
     UserField.destroy_all
 
     @occupation_field = UserField.find_by_name("Occupation")
@@ -113,7 +136,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
     @verified_physician_field = UserField.find_by_name("AMA Verified Physician")
     unless @verified_physician_field
-      @verified_physician_field = UserField.create(name: "AMA Verified Physician", description: "registered as a Physician with AMA", field_type: "text", editable: true, required: false, show_on_profile: true, show_on_user_card: true)
+      @verified_physician_field = UserField.create(name: "AMA Verified Physician", description: "registered as a Physician with AMA", field_type: "text", editable: true, required: false, show_on_profile: false, show_on_user_card: false)
     end
   end
 
@@ -125,6 +148,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     import_categories
     import_topics
     import_messages
+
     #add_moderators
     #add_admins
     #import_avatars
@@ -139,7 +163,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     organisation = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_ORGANISATION_FILE))
     
     mrg = []
-    master.first(100).each do |master_record|
+    master.first(20000).each do |master_record|
       additional.each do |additional_record|
         if additional_record['user_id'] == master_record['id']
           organisation.each do |organisation_record|
@@ -249,6 +273,18 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
         end
       }
     end
+
+    @physicians_group = Group.new(
+      name: "ama_verf_physicians",
+      full_name: "AMA Verified Physicians",
+      bio_raw: "A group containing only AMA Verified Physicians",
+      visibility_level: 3,
+      members_visibility_level: 3,
+      created_at: Time.now,
+      updated_at: Time.now
+    )
+
+    @physicians_group.save!
   end
 
   def import_users
@@ -262,7 +298,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     end
     users.uniq!
 
-    create_users(users.first(100)) do |u|
+    create_users(users.first(20000)) do |u|
       {
         id: u['id'],
         username: u['shortname'],
@@ -301,6 +337,12 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
             physician_object = UserCustomField.create(user_id: newuser.id, name: "user_field_#{physician_id}", value: u['is_physician'] ? "Yes": "No")
           end
           physician_object.save!
+
+          if u['is_physician']
+            @physicians_group.add(newuser)
+            @physicians_group.save!
+          end
+
           puts newuser.id.to_s
           puts u['id'].to_s
         end
@@ -457,9 +499,9 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     topics = 0
     posts = 0
 
-    @imported_topic_json.first(400).each do |t|
+    @imported_topic_json.first(20000).each do |t|
       #ignore posts with blank discussion id's
-      if !t['discussion_id'].blank?
+      if !(t['discussion_id'].blank? || CategoryCustomField.where(name: "import_id", value: (t['discussion_id'] + 1000).to_s).first.nil?)
         topic = {
           id: t['id'],
           is_op: true,
@@ -469,7 +511,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
           updated_at: t['updated'],
           cook_method: Post.cook_methods[:regular],
           title: t['title'].blank? ? HtmlToMarkdown.new(t['body'][0..20] + '...').to_markdown : t['title'],
-          category: category_id_from_imported_category_id(t['group_id'] || (t['discussion_id'] + 1000)),
+          category: CategoryCustomField.where(name: "import_id", value: (t['discussion_id'] + 1000).to_s).first ? CategoryCustomField.where(name: "import_id", value: (t['discussion_id'] + 1000).to_s).first.category_id : category_id_from_imported_category_id(t['group_id']),
           custom_fields: { import_id: t['id'] }
         }
 
@@ -488,7 +530,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       end
     end
 
-    @imported_post_json.first(2400).each do |p|
+    @imported_post_json.first(30000).each do |p|
       new_post = create_post({
         id: p['id'],
         is_op: false,
@@ -543,7 +585,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
     messages = 0
 
-    @imported_message_json.first(300).each do |m|
+    @imported_message_json.first(5000).each do |m|
       if m['sender_type'] == "User" &&
         m['recipient_type'] == "User" &&
         user_id_from_imported_user_id(m['sender_id']) &&
