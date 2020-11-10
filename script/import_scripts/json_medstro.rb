@@ -67,10 +67,10 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
   def scrub_users
     puts "", "Scrubbing Users..."
-    total = User.where("id > 1").count
+    total = User.where("id > 2").count
     start_time = Time.now
     done = 0
-    User.where("id > 1").find_each do |user|
+    User.where("id > 2").find_each do |user|
       user.destroy
       done += 1
       print_status(done, total, start_time)
@@ -163,7 +163,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     organisation = JSON.parse(File.read(JSON_FILE_DIRECTORY + JSON_ORGANISATION_FILE))
     
     mrg = []
-    master.first(20000).each do |master_record|
+    master.first(30000).each do |master_record|
       additional.each do |additional_record|
         if additional_record['user_id'] == master_record['id']
           organisation.each do |organisation_record|
@@ -298,7 +298,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     end
     users.uniq!
 
-    create_users(users.first(20000)) do |u|
+    create_users(users.first(30000)) do |u|
       {
         id: u['id'],
         username: u['shortname'],
@@ -341,6 +341,8 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
           if u['is_physician']
             @physicians_group.add(newuser)
             @physicians_group.save!
+            newuser.primary_group_id = @physicians_group.id
+            newuser.save!
           end
 
           puts newuser.id.to_s
@@ -499,7 +501,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     topics = 0
     posts = 0
 
-    @imported_topic_json.first(20000).each do |t|
+    @imported_topic_json.first(50000).each do |t|
       #ignore posts with blank discussion id's
       if !(t['discussion_id'].blank? || CategoryCustomField.where(name: "import_id", value: (t['discussion_id'] + 1000).to_s).first.nil?)
         topic = {
@@ -530,7 +532,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       end
     end
 
-    @imported_post_json.first(30000).each do |p|
+    @imported_post_json.first(200000).each do |p|
       new_post = create_post({
         id: p['id'],
         is_op: false,
@@ -585,7 +587,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
 
     messages = 0
 
-    @imported_message_json.first(5000).each do |m|
+    @imported_message_json.first(10000).each do |m|
       if m['sender_type'] == "User" &&
         m['recipient_type'] == "User" &&
         user_id_from_imported_user_id(m['sender_id']) &&
