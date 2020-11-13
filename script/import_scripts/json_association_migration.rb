@@ -148,12 +148,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     import_categories
     import_topics
     import_messages
-
-    #add_moderators
-    #add_admins
-    #import_avatars
-    #create_permalinks
-
+    
     puts "", "Done"
   end
 
