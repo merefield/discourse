@@ -20,7 +20,7 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
   GROUP_AVATAR_DIRECTORY = 'group_avatars/'
   CATEGORY_LOGO_DIRECTORY = 'group_avatars/'
   CATEGORY_BACKGROUND_DIRECTORY = 'group_banners/'
-  JSON_FILE_DIRECTORY = '/shared/import/data/ama-pin-transfer/'
+  JSON_FILE_DIRECTORY = '/shared/import/data/cloned-transfer-directory/'
   BATCH_SIZE ||= 1000
 
   def initialize
@@ -134,9 +134,9 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
       @organisation_field = UserField.create(name: "Organization", description: "Your organization", field_type: "text", editable: true, required: false, show_on_profile: true, show_on_user_card: true)
     end
 
-    @verified_physician_field = UserField.find_by_name("AMA Verified Physician")
+    @verified_physician_field = UserField.find_by_name("Verified Physician")
     unless @verified_physician_field
-      @verified_physician_field = UserField.create(name: "AMA Verified Physician", description: "registered as a Physician with AMA", field_type: "text", editable: true, required: false, show_on_profile: false, show_on_user_card: false)
+      @verified_physician_field = UserField.create(name: "Verified Physician", description: "registered as a Physician with Association", field_type: "text", editable: true, required: false, show_on_profile: false, show_on_user_card: false)
     end
   end
 
@@ -275,9 +275,9 @@ class ImportScripts::JsonGeneric < ImportScripts::Base
     end
 
     @physicians_group = Group.new(
-      name: "ama_verf_physicians",
-      full_name: "AMA Verified Physicians",
-      bio_raw: "A group containing only AMA Verified Physicians",
+      name: "verf_physicians",
+      full_name: "Verified Physicians",
+      bio_raw: "A group containing only Verified Physicians",
       visibility_level: 3,
       members_visibility_level: 3,
       created_at: Time.now,
