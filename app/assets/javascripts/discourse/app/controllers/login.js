@@ -1,5 +1,5 @@
 import Controller, { inject as controller } from "@ember/controller";
-import { alias, or, readOnly } from "@ember/object/computed";
+import { alias, not, or, readOnly } from "@ember/object/computed";
 import { areCookiesEnabled, escapeExpression } from "discourse/lib/utilities";
 import cookie, { removeCookie } from "discourse/lib/cookie";
 import { next, schedule } from "@ember/runloop";
@@ -18,6 +18,8 @@ import { getWebauthnCredential } from "discourse/lib/webauthn";
 import { isEmpty } from "@ember/utils";
 import { setting } from "discourse/lib/computed";
 import showModal from "discourse/lib/show-modal";
+import { helperContext } from "discourse-common/lib/helpers";
+import { emojiBasePath } from "discourse/lib/settings";
 
 // This is happening outside of the app via popup
 const AuthErrors = [
@@ -45,6 +47,8 @@ export default Controller.extend(ModalFunctionality, {
   loginRequired: alias("application.loginRequired"),
   secondFactorMethod: SECOND_FACTOR_METHODS.TOTP,
 
+  noLoginLocal: not("canLoginLocal"),
+
   resetForm() {
     this.setProperties({
       loggingIn: false,
@@ -62,19 +66,47 @@ export default Controller.extend(ModalFunctionality, {
     return showSecondFactor || showSecurityKey ? "hidden" : "";
   },
 
+  @discourseComputed()
+  wavingHandURL() {
+    const emojiSet = helperContext().siteSettings.emoji_set;
+
+    // random number between 2 -6 to render multiple skin tone waving hands
+    const random = Math.floor(Math.random() * (7 - 2) + 2);
+    return getURL(`${emojiBasePath()}/${emojiSet}/wave/${random}.png`);
+  },
+
   @discourseComputed("showSecondFactor", "showSecurityKey")
   secondFactorClass(showSecondFactor, showSecurityKey) {
     return showSecondFactor || showSecurityKey ? "" : "hidden";
   },
 
-  @discourseComputed("awaitingApproval", "hasAtLeastOneLoginButton")
-  modalBodyClasses(awaitingApproval, hasAtLeastOneLoginButton) {
+  @discourseComputed(
+    "awaitingApproval",
+    "hasAtLeastOneLoginButton",
+    "showSecondFactor",
+    "canLoginLocal",
+    "showSecurityKey"
+  )
+  modalBodyClasses(
+    awaitingApproval,
+    hasAtLeastOneLoginButton,
+    showSecondFactor,
+    canLoginLocal,
+    showSecurityKey
+  ) {
     const classes = ["login-modal"];
     if (awaitingApproval) {
       classes.push("awaiting-approval");
     }
-    if (hasAtLeastOneLoginButton) {
+    if (hasAtLeastOneLoginButton && !showSecondFactor && !showSecurityKey) {
       classes.push("has-alt-auth");
+      document.querySelector("#discourse-modal").classList.add("has-alt-auth");
+    }
+    if (!canLoginLocal) {
+      classes.push("no-local-login");
+    }
+    if (showSecondFactor || showSecurityKey) {
+      classes.push("second-factor");
     }
     return classes.join(" ");
   },
@@ -84,9 +116,9 @@ export default Controller.extend(ModalFunctionality, {
     return showSecondFactor || showSecurityKey;
   },
 
-  @discourseComputed("canLoginLocalWithEmail")
-  hasAtLeastOneLoginButton(canLoginLocalWithEmail) {
-    return findAll().length > 0 || canLoginLocalWithEmail;
+  @discourseComputed()
+  hasAtLeastOneLoginButton() {
+    return findAll().length > 0;
   },
 
   @discourseComputed("loggingIn")
@@ -103,9 +135,9 @@ export default Controller.extend(ModalFunctionality, {
 
   showSpinner: readOnly("loggingIn"),
 
-  @discourseComputed("canLoginLocalWithEmail", "processingEmailLink")
-  showLoginWithEmailLink(canLoginLocalWithEmail, processingEmailLink) {
-    return canLoginLocalWithEmail && !processingEmailLink;
+  @discourseComputed("canLoginLocalWithEmail")
+  showLoginWithEmailLink(canLoginLocalWithEmail) {
+    return canLoginLocalWithEmail;
   },
 
   actions: {
@@ -141,8 +173,6 @@ export default Controller.extend(ModalFunctionality, {
               (result.security_key_enabled || result.totp_enabled) &&
               !this.secondFactorRequired
             ) {
-              document.getElementById("modal-alert").style.display = "none";
-
               this.setProperties({
                 otherMethodAllowed: result.multiple_second_factor_methods,
                 secondFactorRequired: true,
@@ -282,7 +312,7 @@ export default Controller.extend(ModalFunctionality, {
       }
 
       if (isEmpty(this.loginName)) {
-        this.flash(I18n.t("login.blank_username"), "error");
+        this.flash(I18n.t("login.blank_username"), "info");
         return;
       }
 

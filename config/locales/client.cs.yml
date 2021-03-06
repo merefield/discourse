@@ -1126,7 +1126,6 @@ cs:
     trust_level: "Důvěryhodnost"
     search_hint: "uživatelské jméno, email nebo IP adresa"
     create_account:
-      title: "Vytvořit nový účet"
       failed: "Něco se nepovedlo, možná je tato e-mailová adresa již použita. Zkuste použít formulář pro obnovení hesla."
     forgot_password:
       title: "Obnovení hesla"
@@ -1156,7 +1155,6 @@ cs:
       password: "Heslo"
       second_factor_description: "Prosím zadejte autentikační kód z vaší aplikace:"
       second_factor_backup_description: "Prosíme zadejte jeden ze svých záložních kódů:"
-      email_placeholder: "emailová adresa nebo uživatelské jméno"
       caps_lock_warning: "zapnutý Caps Lock"
       error: "Neznámá chyba"
       rate_limit: "Počkejte před dalším pokusem se přihlásit."
@@ -1675,7 +1673,6 @@ cs:
         title: "Zavřít dočasně"
       auto_close:
         title: "Automaticky zavřít téma"
-        label: "Automaticky zavřít téma za:"
         error: "Prosím zadejte platnou hodnotu."
         based_on_last_post: "Neuzavírejte téma dokud poslední příspěvek v tomto tématu není alespoň takto starý."
       auto_delete:
@@ -1686,7 +1683,6 @@ cs:
         auto_open: "Toto téma se automaticky otevře %{timeLeft}."
         auto_close: "Toto téma se automaticky zavře %{timeLeft}."
         auto_publish_to_category: "Toto téma bude zveřejněno v <a href=%{categoryUrl}>%{categoryName}</a>%{timeLeft}# ."
-        auto_close_based_on_last_post: "Toto téma se zavře %{duration} po poslední odpovědi."
         auto_delete: "Toto téma bude automaticky smazáno %{timeLeft}."
         auto_reminder: "Toto téma ti připomeneme %{timeLeft}."
       auto_close_title: "Nastavení automatického zavření"
@@ -1839,13 +1835,11 @@ cs:
         username_placeholder: "uživatelské jméno"
         action: "Poslat pozvánku"
         help: "pozval ostatní do tohoto tématu pomocí emailu nebo notifikací"
-        sso_enabled: "Zadej uživatelské jméno člověka, kterého chceš pozvat do tohoto tématu."
         to_topic_blank: "Zadej uživatelské jméno a email člověka, kterého chceš pozvat do tohoto tématu."
         to_topic_email: "Zadal jste emailovou adresu. Pošleme na ni pozvánku, s jejíž pomocí bude moci váš kamarád ihned odpovědět do tohoto tématu."
         to_topic_username: "Zadali jste uživatelské jméno. Zašleme pozvánku s odkazem do tohoto tématu."
         to_username: "Zadejte uživatelské jméno člověka, kterého chcete pozvat. Zašleme pozvánku s odkazem do tohoto tématu."
         email_placeholder: "jmeno@priklad.cz"
-        success_email: "Zaslali jsme pozvánku na <b>%{emailOrUsername}</b>. Upozorníme vás až bude pozvánka použita. Své pozvánky můžete sledovat v tabulce pozvánek na svém uživatelském profilu."
         success_username: "Pozvali jsme zadaného uživatele, aby se zúčastnil tématu."
         error: "Bohužel se nepodařilo pozvat tuto osobu. Možná už byla pozvána? (Počet opakovaných pozvánek je omezen)."
         success_existing_email: "Uživatel s e-mailem<b>%{emailOrUsername}</b> již existuje. Pozvali jsme ho, aby se zúčastnil tohoto tématu."
@@ -2157,18 +2151,15 @@ cs:
       notifications:
         watching:
           title: "Hlídání"
-          description: "Budete automaticky sledovat všechna témata v těchto kategoriích. Budete upozorněni na každý nový příspěvek v každém tématu a zobrazí se počet nových odpovědí."
         watching_first_post:
           title: "Hlídání prvního příspěvku"
         tracking:
           title: "Sledování"
-          description: "Budete automaticky sledovat všechna nová témata v těchto kategoriích. Budete upozorněni, pokud někdo zmíní vaše @jméno nebo vám odpoví, a zobrazí se počet nových odpovědí."
         regular:
           title: "Normální"
           description: "Budete informováni pokud někdo zmíní vaše @jméno nebo odpoví na váš příspěvek."
         muted:
           title: "Ztišený"
-          description: "Nikdy nebudete dostávat upozornění na nová témata v těchto kategoriích a neobjeví se v aktuálních."
       search_priority:
         options:
           normal: "Normální"
@@ -2644,10 +2635,6 @@ cs:
             available: "Název skupiny je k dispozici"
             not_available: "Název skupiny není k dispozici"
             blank: "Název skupiny nemůže být prázdný"
-        bulk_add:
-          title: "Hromadné přidání do skupiny"
-          complete_users_not_added: "Tito uživatelé nebyli přidáni (ujistěte se, že mají účet):"
-          paste: "Vložte seznam uživatelských jmen a e-mailů, jeden záznam na řádek:"
         manage:
           interaction:
             email: Email
@@ -3185,14 +3172,8 @@ cs:
         title: "Sledovaná slova"
         search: "hledat"
         clear_filter: "Zrušit"
-        show_words: "zobrazit slova"
         download: Stáhnout
         clear_all: Vymazat vše
-        word_count:
-          one: "%{count} slovo"
-          few: "%{count} slova"
-          many: "%{count} slov"
-          other: "%{count} slov"
         actions:
           block: "Zablokovat"
           censor: "Cenzurovat "
@@ -3204,7 +3185,6 @@ cs:
           require_approval: "Příspěvky obsahující tato slova budou vyžadovat schválení zaměstnanců před schválením."
           flag: "Povolit příspěvky obsahující tato slova, ale oflagovat je jako nevhodně, aby je mohli moderátoři kontrolovat."
         form:
-          label: "Nové slovo:"
           placeholder: "celé slovo nebo* jako zástupný znak"
           placeholder_regexp: "obvyklý výraz"
           add: "přidat"
@@ -3409,13 +3389,6 @@ cs:
           on_grace_period: "Currently in promotion grace period, will not be demoted."
           locked_will_not_be_promoted: "Úroveň důvěryhodnosti uzamčena. Nikdy nebude povýšen."
           locked_will_not_be_demoted: "Úroveň důvěryhodnosti uzamčena. Nikdy nebude degradován."
-        sso:
-          title: "Jednorázové přihlášení"
-          external_id: "Externí ID"
-          external_username: "Uživatelské jméno"
-          external_name: "Jméno"
-          external_email: "Email"
-          external_avatar_url: "URL na profilový obrázek"
       user_fields:
         title: "User Fields"
         help: "Přidej fields, které tvoji uživatelé mohou vyplnit."

@@ -940,7 +940,6 @@ da:
         secondary: "Sekundære emails"
         primary_label: "Primær"
         update_email: "Skift e-mail-adresse"
-        sso_override_instructions: "Email kan opdateres fra SSO-udbyderen."
         no_secondary: "Ingen sekundære emails"
         instructions: "Vis aldrig offentligt"
         ok: "Vi vil sende dig en bekræftelses email"
@@ -1254,7 +1253,6 @@ da:
     search_hint: "brugernavn, email eller IP adresse"
     create_account:
       disclaimer: "Ved at registrere dig accepterer du <a href='%{privacy_link}' target='blank'>Privatlivsbetingelser</a> og <a href='%{tos_link}' target='blank'>servicevilkårene</a> ."
-      title: "Opret konto"
       failed: "Noget gik galt. Måske er e-mail-adressen allerede registreret – prøv “Jeg har glemt min adgangskode”-linket"
     forgot_password:
       title: "Nulstil kodeord"
@@ -1286,7 +1284,6 @@ da:
       password: "Adgangskode"
       second_factor_description: "Indtast godkendelseskoden fra din app:"
       second_factor_backup_description: "Indtast en af dine backup koder:"
-      email_placeholder: "e-mail eller brugernavn"
       caps_lock_warning: "Caps Lock er sat til"
       error: "Ukendt fejl"
       cookies_error: "Din browser ser ud til at have deaktiveret cookies. Du kan muligvis ikke lave et log ind, uden at aktivere dem først."
@@ -1674,7 +1671,6 @@ da:
     go_back: "gå tilbage"
     not_logged_in_user: "bruger side, med oversigt over aktivitet og indstillinger"
     current_user: "gå til brugerside"
-    view_all: "vis alle"
     topics:
       new_messages_marker: "sidste besøg"
       bulk:
@@ -1794,7 +1790,7 @@ da:
         remove: "Fjern timerfunktion"
         publish_to: "Udgiv I:"
         when: "Hvornår:"
-        time_frame_required: Vælg en tidsramme
+        time_frame_required: "Vælg en tidsramme"
       auto_update_input:
         none: "Vælg en tidsramme"
         later_today: "Senere i dag"
@@ -1822,7 +1818,6 @@ da:
         title: "Luk Midlertidigt"
       auto_close:
         title: "Luk Automatisk Emnet"
-        label: "Auto-luk emne, timer:"
         error: "Indtast venligst en gyldig værdi."
         based_on_last_post: "Luk ikke før det seneste indlæg i emnet er mindst så gammel."
       auto_delete:
@@ -1835,7 +1830,6 @@ da:
         auto_open: "Emnet åbner automatisk %{timeLeft}."
         auto_close: "Emnet lukker automatisk %{timeLeft}."
         auto_publish_to_category: "Emnet vil blive udgivet i <a href=%{categoryUrl}>#%{categoryName}</a> %{timeLeft}."
-        auto_close_based_on_last_post: "Emnet vil lukke %{duration} efter det sidste svar."
         auto_delete: "Dette emne slettes automatisk %{timeLeft}."
         auto_bump: "Dette emne bliver automatisk 'bumped' %{timeLeft}."
         auto_reminder: "Du vil blive mindet om dette emne %{timeLeft}."
@@ -1988,13 +1982,11 @@ da:
         username_placeholder: "brugernavn"
         action: "Send invitation"
         help: "inviter andre til dette emne via email eller notifikationer"
-        sso_enabled: "Indtast brugernavnet på den person, du gerne vil invitere til dette emne."
         to_topic_blank: "Indtast brugernavnet eller en email adresse på den person, du gerne vil invitere til dette emne."
         to_topic_email: "Du har indtastet en email adresse. Vi vil sende en e-mail invitation, der giver din ven direkte adgang til at svare på dette emne."
         to_topic_username: "Du har indtastet et brugernavn. Vi sender en notifikation med en invitation til denne tråd."
         to_username: "Indtast brugernavnet på den person du vil invitere. Vi sender en notifikation med et link til denne tråd."
         email_placeholder: "e-mail-adresse"
-        success_email: "Vi har e-mailet en invitation til <b>%{emailOrUsername}</b>. Vi notificerer dig, når invitationen er blevet accepteret. Kig på invitations fanebladet på din bruger side for at se status på dine invitationer."
         success_username: "Vi har inviteret brugeren til at deltage i dette emne."
         error: "Beklager, vi kunne ikke invitere denne person. Måske er de allerede inviteret? (der er begrænsning på hvor mange gange man kan invitere en person)"
         success_existing_email: "En bruger med email <b>%{emailOrUsername}</b> eksisterer allerede. Vi har opfordret denne bruger til at deltage i dette emne."
@@ -2319,19 +2311,16 @@ da:
       notifications:
         watching:
           title: "Overvåger"
-          description: "Du overvåger automatisk alle emner i disse kategorier. Du får besked om hvert nyt indlæg i hvert emne og antallet af nye svar bliver vist."
         watching_first_post:
           title: "Overvåger Første Indlæg"
           description: "Du vil blive underrettet om nye emner i denne kategori, men ikke svar på emnerne."
         tracking:
           title: "Følger"
-          description: "Du tracker automatisk alle emner i disse kategorier. Du får besked hvis nogen nævner dit @navn eller svarer dig, og antallet af nye svar bliver vist."
         regular:
           title: "Normal"
           description: "Du vil modtage en notifikation, hvis nogen nævner dit @name eller svarer dig."
         muted:
           title: "Ignoreret"
-          description: "Du vil aldrig få besked om noget om nye emner i kategorierne og de vises heller ikke i seneste."
       search_priority:
         label: "Søgeprioritet"
         options:
@@ -2837,10 +2826,6 @@ da:
             available: "Gruppenavnet er tilgængeligt"
             not_available: "Gruppenavnet er ikke tilgængelig"
             blank: "Gruppenavnet kan ikke være tomt"
-        bulk_add:
-          title: "Tilføj mange brugere til gruppe"
-          complete_users_not_added: "Disse brugere blev ikke tilføjet (sørg for at sikre, at de har en konto):"
-          paste: "Indsæt en liste brugerne eller emails, én per linje:"
         add_members:
           as_owner: "Angiv bruger (e) som ejer (e) af denne gruppe"
         manage:
@@ -3508,17 +3493,12 @@ da:
         title: "Overvågede ord"
         search: "Søg"
         clear_filter: "Ryd"
-        show_words: "Vis ord"
-        one_word_per_line: "Et ord pr. linje"
         download: Download
         clear_all: Ryd alle
         clear_all_confirm_block: "Er du sikker på, at du vil rydde alle overvågede ord for Blokér-handlingen?"
         clear_all_confirm_censor: "Er du sikker på, at du vil rydde alle overvågede ord for Censor-handlingen?"
         clear_all_confirm_flag: "Er du sikker på, at du vil rydde alle overvågede ord for Markér-handlingen?"
         clear_all_confirm_require_approval: "Er du sikker på, at du vil rydde alle overvågede ord for Kræv Godkendelse-handlingen?"
-        word_count:
-          one: "%{count} ord"
-          other: "%{count} ord"
         actions:
           block: "Blokér"
           censor: "Censor"
@@ -3530,7 +3510,6 @@ da:
           require_approval: "Indlæg, der indeholder disse ord, kræver godkendelse af hjælperteam, før de kan ses."
           flag: "Tillad indlæg, der indeholder disse ord, men markér dem som upassende, så moderatorer kan gennemgå dem."
         form:
-          label: "Nyt ord:"
           placeholder: "fuldt ord eller * som jokertegn"
           placeholder_regexp: "almindelig udtryk"
           add: "Tilføj"
@@ -3743,13 +3722,6 @@ da:
           on_grace_period: "Er i øjeblikket i forfremmelses prøve periode, vil ikke blive degraderet."
           locked_will_not_be_promoted: "Tillidsniveau låst. Vil aldrig blive forfremmet."
           locked_will_not_be_demoted: "Tillidsniveau låst. Vil aldrig blive degraderet."
-        sso:
-          title: "Single Sign On"
-          external_id: "Externt ID"
-          external_username: "Brugernavn"
-          external_name: "Navn"
-          external_email: "Email"
-          external_avatar_url: "Profilbillede URL"
       user_fields:
         title: "Bruger felter"
         help: "Tilføj felter, som dine brugere kan udfylde"

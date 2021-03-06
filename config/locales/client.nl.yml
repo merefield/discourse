@@ -1115,7 +1115,6 @@ nl:
         set_primary: "Primair e-mailadres instellen"
         destroy: "E-mailadres verwijderen"
         add_email: "Alternatief e-mailadres toevoegen"
-        sso_override_instructions: "E-mailadres kan vanaf SSO-provider worden bijgewerkt."
         no_secondary: "Geen extra e-mailadressen"
         instructions: "Nooit openbaar zichtbaar."
         admin_note: "Opmerking: een beheerder die het e-mailadres van een andere niet-beheerder wijzigt, geeft aan dat de gebruiker geen toegang meer heeft tot zijn of haar e-mailaccount, dus er wordt een e-mail voor opnieuw instellen van het wachtwoord naar zijn of haar nieuwe adres gestuurd. Het e-mailadres van de gebruiker wordt pas gewijzigd nadat hij of zij het proces voor opnieuw instellen van het wachtwoord heeft voltooid."
@@ -1477,7 +1476,6 @@ nl:
     search_hint: "gebruikersnaam, e-mailadres of IP-adres"
     create_account:
       disclaimer: "Door te registreren gaat u akkoord met het <a href='%{privacy_link}' target='blank'>privacybeleid</a> en de <a href='%{tos_link}' target='blank'>servicevoorwaarden</a>."
-      title: "Nieuw account maken"
       failed: "Er is iets misgegaan; mogelijk is het e-mailadres al geregistreerd. Probeer de koppeling 'Wachtwoord vergeten'."
     forgot_password:
       title: "Wachtwoord herinitialiseren"
@@ -1495,7 +1493,7 @@ nl:
       button_help: "Help"
     email_login:
       link_label: "Een koppeling voor aanmelding e-mailen"
-      button_label: "via e-mail"
+      button_label: "met e-mail"
       emoji: "slot-emoji"
       complete_username: "Als een account overeenkomt met de gebruikersnaam <b>%{username}</b>, zou u spoedig een e-mail met een koppeling voor aanmelding moeten ontvangen."
       complete_email: "Als een account overeenkomt met <b>%{email}</b>, zou u spoedig een e-mail met een koppeling voor aanmelding moeten ontvangen."
@@ -1522,7 +1520,6 @@ nl:
       security_key_not_allowed_error: "Het authenticatieproces van de beveiligingssleutel had een time-out of is geannuleerd."
       security_key_no_matching_credential_error: "Geen referenties gevonden in de opgegeven beveiligingssleutel."
       security_key_support_missing_error: "Uw huidige apparaat of browser ondersteunt geen gebruik van beveiligingssleutels. Gebruik een andere methode."
-      email_placeholder: "e-mailadres of gebruikersnaam"
       caps_lock_warning: "Caps Lock staat aan"
       error: "Onbekende fout"
       cookies_error: "Het lijkt erop dat uw browser geen cookies toestaat. Als u ze niet eerst toestaat, kunt u zich misschien niet aanmelden."
@@ -1589,7 +1586,6 @@ nl:
       apple_international: "Apple/International"
       google: "Google"
       twitter: "Twitter"
-      emoji_one: "JoyPixels (voorheen EmojiOne)"
       win10: "Win10"
       google_classic: "Google Klassiek"
       facebook_messenger: "Facebook Messenger"
@@ -1989,7 +1985,6 @@ nl:
     go_back: "terug"
     not_logged_in_user: "gebruikerspagina met samenvatting van huidige activiteit en voorkeuren"
     current_user: "naar uw gebruikerspagina"
-    view_all: "alle bekijken"
     topics:
       new_messages_marker: "laatste bezoek"
       bulk:
@@ -2020,7 +2015,6 @@ nl:
         choose_new_tags: "Kies nieuwe tags voor deze topics:"
         choose_append_tags: "Kies nieuwe tags om voor deze topics toe te voegen:"
         changed_tags: "De tags van deze topics zijn gewijzigd."
-        remove_tags: "Tags verwijderen"
         progress:
           one: "Voortgang: <strong>%{count}</strong> topic"
           other: "Voortgang: <strong>%{count}</strong> topics"
@@ -2147,7 +2141,7 @@ nl:
         remove: "Timer verwijderen"
         publish_to: "Publiceren naar:"
         when: "Wanneer:"
-        time_frame_required: Selecteer een tijdsbestek
+        time_frame_required: "Selecteer een tijdsbestek"
       auto_update_input:
         none: "Selecteer een tijdsbestek"
         now: "Nu"
@@ -2176,7 +2170,6 @@ nl:
         title: "Tijdelijk sluiten"
       auto_close:
         title: "Topic automatisch sluiten"
-        label: "Tijden voor automatisch sluiten van topic:"
         error: "Voer een geldige waarde in."
         based_on_last_post: "Pas sluiten als het laatste bericht in het topic minstens zo oud is"
       auto_delete:
@@ -2191,7 +2184,6 @@ nl:
         auto_open: "Dit topic wordt %{timeLeft} automatisch geopend."
         auto_close: "Dit topic wordt %{timeLeft} automatisch gesloten."
         auto_publish_to_category: "Dit topic wordt %{timeLeft} naar <a href=%{categoryUrl}>#%{categoryName}</a> gepubliceerd."
-        auto_close_based_on_last_post: "Dit topic wordt %{duration} na het laatste antwoord gesloten."
         auto_delete: "Dit topic wordt %{timeLeft} automatisch verwijderd."
         auto_bump: "Dit topic wordt %{timeLeft} automatisch gebumpt."
         auto_reminder: "U wordt %{timeLeft} aan dit topic herinnerd."
@@ -2350,13 +2342,11 @@ nl:
         username_placeholder: "gebruikersnaam"
         action: "Uitnodiging sturen"
         help: "anderen uitnodigen voor dit topic via e-mail of meldingen"
-        sso_enabled: "Voer de gebruikersnaam in van de persoon die u voor dit topic wilt uitnodigen."
         to_topic_blank: "Voer de gebruikersnaam of het e-mailadres in van de persoon die u voor dit topic wilt uitnodigen."
         to_topic_email: "U hebt een e-mailadres ingevoerd. We sturen een uitnodiging per e-mail waarmee uw vriend(in) direct op dit topic kan antwoorden."
         to_topic_username: "U hebt een gebruikersnaam ingevoerd. We sturen een melding met een uitnodigingskoppeling om aan dit topic deel te nemen."
         to_username: "Voer de gebruikersnaam in van de persoon die u wilt uitnodigen. We sturen een melding met een uitnodigingskoppeling om aan dit topic deel te nemen."
         email_placeholder: "name@example.com"
-        success_email: "Er is een uitnodiging naar <b>%{emailOrUsername}</b> gemaild. We stellen u op de hoogte als op de uitnodiging is ingegaan. Controleer het uitnodigingentabblad op uw gebruikerspagina om uw uitnodigingen bij te houden."
         success_username: "We hebben die gebruiker uitgenodigd om aan dit topic deel te nemen."
         error: "Sorry, we konden deze persoon niet uitnodigen. Misschien is deze al uitgenodigd? (Uitnodigingen zijn in aantal beperkt)"
         success_existing_email: "Er bestaat al een gebruiker met het e-mailadres <b>%{emailOrUsername}</b>. We hebben deze gebruiker uitgenodigd om aan dit topic deel te nemen."
@@ -2754,19 +2744,16 @@ nl:
       notifications:
         watching:
           title: "In de gaten houden"
-          description: "U houdt automatisch alle topics in deze categorieën in de gaten. U ontvangt meldingen voor elk nieuw bericht in elk topic, en het aantal nieuwe antwoorden verschijnt naast het topic."
         watching_first_post:
           title: "Eerste bericht in de gaten houden"
           description: "U ontvangt meldingen over nieuwe topics in deze categorie, maar niet over antwoorden op de topics."
         tracking:
           title: "Volgen"
-          description: "U volgt automatisch alle topics in deze categorieën. U ontvangt een melding als iemand uw @naam noemt of een bericht van u beantwoordt, en het aantal nieuwe antwoorden wordt weergegeven."
         regular:
           title: "Normaal"
           description: "U ontvangt een melding als iemand uw @naam noemt of een bericht van u beantwoordt."
         muted:
           title: "Genegeerd"
-          description: "U ontvangt geen enkele melding over nieuwe topics in deze categorieën, en ze verschijnen niet in Nieuwste."
       search_priority:
         label: "Zoekprioriteit"
         options:
@@ -3339,10 +3326,6 @@ nl:
             available: "Groepsnaam is beschikbaar"
             not_available: "Groepsnaam is niet beschikbaar"
             blank: "Groepsnaam mag niet leeg zijn"
-        bulk_add:
-          title: "Bulk toevoegen aan groep"
-          complete_users_not_added: "Deze gebruikers zijn niet toegevoegd (controleer of ze een account hebben):"
-          paste: "Plak een lijst van gebruikersnamen of e-mailadressen, één per regel:"
         add_members:
           as_owner: "Gebruiker(s) als eigenaar(s) van deze groep instellen"
         manage:
@@ -3442,7 +3425,6 @@ nl:
               wordpress: Noodzakelijk om de WordPress wp-discourse-plug-in te laten werken.
             users:
               bookmarks: Bladwijzers van gebruiker weergeven. Geeft bladwijzerherinneringen terug bij gebruik van de ICS-indeling.
-              sync_sso: Een gebruiker synchroniseren via SSO.
               show: Informatie over een gebruiker verkrijgen.
               check_emails: E-mailadressen van gebruiker weergeven.
               update: Gebruikersprofielgegevens bijwerken.
@@ -4121,17 +4103,12 @@ nl:
         title: "In de gaten gehouden woorden"
         search: "zoeken"
         clear_filter: "Wissen"
-        show_words: "woorden tonen"
-        one_word_per_line: "Eén woord per regel"
         download: Downloaden
         clear_all: Alles wissen
         clear_all_confirm_block: "Weet u zeker dat u alle in de gaten gehouden woorden voor de actie Blokkeren wilt wissen?"
         clear_all_confirm_censor: "Weet u zeker dat u alle in de gaten gehouden woorden voor de actie Censureren wilt wissen?"
         clear_all_confirm_flag: "Weet u zeker dat u alle in de gaten gehouden woorden voor de actie Markeren wilt wissen?"
         clear_all_confirm_require_approval: "Weet u zeker dat u alle in de gaten gehouden woorden voor de actie Heeft goedkeuring nodig wilt wissen?"
-        word_count:
-          one: "%{count} woord"
-          other: "%{count} woorden"
         actions:
           block: "Blokkeren"
           censor: "Censureren"
@@ -4143,7 +4120,6 @@ nl:
           require_approval: "Berichten die deze woorden bevatten, vereisen goedkeuring door stafleden voordat ze kunnen worden bekeken."
           flag: "Berichten met deze woorden toestaan, maar deze markeren als ongepast zodat moderators ze kunnen beoordelen."
         form:
-          label: "Nieuw woord:"
           placeholder: "volledig woord of * als jokerteken"
           placeholder_regexp: "reguliere expressie"
           add: "Toevoegen"
@@ -4389,16 +4365,6 @@ nl:
           on_grace_period: "Op dit moment in promotiewachtperiode, zal niet worden gedegradeerd."
           locked_will_not_be_promoted: "Vertrouwensniveau vergrendeld. Zal nooit worden gepromoveerd."
           locked_will_not_be_demoted: "Vertrouwensniveau vergrendeld. Zal nooit worden gedegradeerd."
-        sso:
-          title: "Single Sign On"
-          external_id: "Externe ID"
-          external_username: "Gebruikersnaam"
-          external_name: "Naam"
-          external_email: "E-mailadres"
-          external_avatar_url: "URL van profielafbeelding"
-          last_payload: "Laatste payload"
-          delete_sso_record: "SSO-record verwijderen"
-          confirm_delete: "Weet u zeker dat u deze record voor eenmalige aanmelding (SSO) wilt verwijderen?"
       user_fields:
         title: "Gebruikersvelden"
         help: "Voeg velden toe die uw gebruikers kunnen invullen."

@@ -49,11 +49,15 @@ section.post-menu-area {
 
 nav.post-controls {
   padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   .actions {
     text-align: right;
-    float: right;
     display: inline-block;
+    margin-left: auto;
+
     .more-actions {
       display: none;
       overflow: hidden;
@@ -604,8 +608,8 @@ blockquote {
       (#{$topic-body-width-padding} * 2)
   );
   @media all and (max-width: 790px) {
-    // 16px is the left + right padding on .wrap in common/base/discourse.scss
-    max-width: calc(100vw - 16px);
+    // 32px is (left + right padding * 2) from .wrap in common/base/discourse.scss
+    max-width: calc(100vw - 32px);
   }
 }
 

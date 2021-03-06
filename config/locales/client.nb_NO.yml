@@ -1101,7 +1101,6 @@ nb_NO:
     trust_level: "Tillitsnivå"
     search_hint: "brukernavn, e-post eller IP-adresse"
     create_account:
-      title: "Opprett ny konto"
       failed: "Noe gikk galt, kanskje denne e-postadressen allerede er registrert. Prøv lenke for glemt passord"
     forgot_password:
       title: "Nullstill Passord"
@@ -1131,7 +1130,6 @@ nb_NO:
       password: "Passord"
       second_factor_description: "Skriv inn verifiseringskoden fra din app:"
       second_factor_backup_description: "Vennligst skriv en av reservekodene dine:"
-      email_placeholder: "e-postadresse eller brukernavn"
       caps_lock_warning: "Caps Lock er på"
       error: "Ukjent feil"
       rate_limit: "Vent litt før du logger inn igjen."
@@ -1613,7 +1611,6 @@ nb_NO:
         title: "Lukk midlertidig"
       auto_close:
         title: "Automatisk lukking av emne"
-        label: "Tidsrom for automatisk lukking av emne:"
         error: "Skriv inn en gyldig verdi."
         based_on_last_post: "Ikke lukk før det siste innlegget i emnet er minst så gammelt."
       auto_delete:
@@ -1626,7 +1623,6 @@ nb_NO:
         auto_open: "Dette emnet vil åpnes automatisk %{timeLeft}."
         auto_close: "Dette emnet vil lukkes automatisk %{timeLeft}."
         auto_publish_to_category: "Dette emnet vil bli opprettet i <a href=%{categoryUrl}>#%{categoryName}</a> %{timeLeft}."
-        auto_close_based_on_last_post: "Dette emnet vil bli lukket %{duration} etter det siste innlegget."
         auto_delete: "Dette emnet vil bli automatisk slettet %{timeLeft}."
         auto_bump: "Dette emnet vil automatisk bli flyttet øverst om %{timeLeft}."
         auto_reminder: "Du vil bli påminnet om dette emnet %{timeLeft}."
@@ -1774,13 +1770,11 @@ nb_NO:
         username_placeholder: "brukernavn"
         action: "Send Invitasjon"
         help: "Inviter andre til dette emnet via e-post eller varsler"
-        sso_enabled: "Oppgi brukernavnet til personen du ønsker å invitere til dette emnet."
         to_topic_blank: "Oppgi brukernavnet eller e-postadressen til personen du ønsker å invitere til dette emnet."
         to_topic_email: "Du har oppgitt en e-postadresse. Vi vil sende en invitasjon som lar vennen din svare på dette emnet umiddelbart."
         to_topic_username: "Du har oppgitt et brukernavn. Vi sender et varsel med en lenke som inviterer dem til dette emnet."
         to_username: "Oppgi brukernavnet til personen du ønsker å invitere. Vi sender et varsel med en lenke som inviterer vedkommende til dette emnet."
         email_placeholder: "navn@example.com"
-        success_email: "Vi har sendt ut en invitasjon til <b>%{emailOrUsername}</b>. Vi varsler deg når invitasjonen er godtatt. Sjekk invitiasjonsfanen på brukersiden din for å beholde oversikten over invitasjonene dine."
         success_username: "Vi har invitert den valgte brukeren til å delta i dette emnet."
         error: "Beklager, vi kunne ikke invitere den brukeren. Vedkommende har muligens allerede blitt invitert? (Antall invitasjoner er begrenset)"
         success_existing_email: "En bruker med e-postadressen <b>%{emailOrUsername}</b> finnes allerede. Vi har invitert brukeren til å delta i dette emnet."
@@ -2058,18 +2052,15 @@ nb_NO:
       notifications:
         watching:
           title: "Følger"
-          description: "Du vil automatisk følge alle emnene i disse kategoriene. Du vil bli varslet om alle nye innlegg i hvert emne, og antall nye svar vil bli vist."
         watching_first_post:
           title: "Følger første innlegg"
         tracking:
           title: "Overvåkning"
-          description: "Du vil automatisk overvåke alle emner i disse kategoriene. Du vil bli varslet dersom noen nevner @navnet ditt eller svarer deg, og antallet nye svar vil bli vist."
         regular:
           title: "Normal"
           description: "Du vil bli varslet om noen nevner @navnet ditt eller svarer deg."
         muted:
           title: "Ignorert"
-          description: "Du vil aldri bli varslet om noe vedrørende nye emner i disse kategoriene, og de vil ikke vises i listen over siste."
       search_priority:
         options:
           normal: "Normal"
@@ -2523,10 +2514,6 @@ nb_NO:
             available: "Gruppenavn tilgjengelig"
             not_available: "Gruppenavn ikke tilgjengelig"
             blank: "Gruppenavnet kan ikke være tomt"
-        bulk_add:
-          title: "Legg til flere til gruppe"
-          complete_users_not_added: "Disse brukerne ble ikke lagt til (sjekk om kontoen finnes):"
-          paste: "Lim inn en liste over brukernavn eller e-poster, en per linje:"
         add_members:
           as_owner: "Sett bruker(e) som eier(e) av denne gruppen"
         manage:
@@ -3087,12 +3074,8 @@ nb_NO:
         title: "Ord som holdes oppsyn med"
         search: "søk"
         clear_filter: "Tøm"
-        show_words: "vis ord"
         download: Last ned
         clear_all: Fjern alle
-        word_count:
-          one: "ett ord"
-          other: "%{count} ord"
         actions:
           block: "Blokker"
           censor: "Sensurer"
@@ -3104,7 +3087,6 @@ nb_NO:
           require_approval: "Innlegg som inneholder disse ordene, vil måtte godkjennes av staben før de kan bli sett."
           flag: "Tillat innlegg som inneholder disse ordene, men flagg dem som upassende slik at moderatorer kan se over dem."
         form:
-          label: "Nytt ord:"
           placeholder: "helt ord eller * som jokertegn"
           placeholder_regexp: "regulært uttrykk"
           add: "Legg til"
@@ -3309,13 +3291,6 @@ nb_NO:
           on_grace_period: "For tiden i prøvetid for forfremmelse, vil ikke degraderes"
           locked_will_not_be_promoted: "Tillitsnivå låst. Vil aldri bli forfremmet."
           locked_will_not_be_demoted: "Tillitsnivå låst. Vil aldri bli degradert."
-        sso:
-          title: "Single Sign On"
-          external_id: "Ekstern-ID"
-          external_username: "Brukernavn"
-          external_name: "Navn"
-          external_email: "E-post"
-          external_avatar_url: "Profilbilde URL"
       user_fields:
         title: "Brukerfelter"
         help: "Legg til felter som dine brukere kan fylle ut."

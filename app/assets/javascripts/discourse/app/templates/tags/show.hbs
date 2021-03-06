@@ -7,15 +7,6 @@
     <div class="container">
       <section class="navigation-container tag-navigation">
 
-        {{#if showTagFilter}}
-          {{#if additionalTags}}
-            {{!-- Tag intersections don't work with the tag filter, so show the tag heading instead --}}
-            {{tag-heading tag=tag additionalTags=additionalTags}}
-          {{/if}}
-        {{else}}
-          {{tag-heading tag=tag additionalTags=additionalTags}}
-        {{/if}}
-
         {{d-navigation
           filterMode=filterMode
           canCreateTopic=canCreateTopic
@@ -72,6 +63,15 @@
                   action=(action "dismissReadPosts")
                   title="topics.bulk.dismiss_tooltip"
                   label="topics.bulk.dismiss_button"}}
+              {{/if}}
+
+              {{#if showResetNew}}
+                {{d-button
+                  class="btn-default dismiss-read"
+                  action=(action "resetNew")
+                  id="dismiss-new"
+                  icon="check"
+                  label="topics.bulk.dismiss_new"}}
               {{/if}}
 
               {{#footer-message education=footerEducation message=footerMessage}}

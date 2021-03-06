@@ -3,18 +3,18 @@
 require 'rails_helper'
 
 describe DismissTopics do
-  fab!(:user) { Fabricate(:user) }
+  fab!(:user) { Fabricate(:user, created_at: 1.days.ago) }
   fab!(:category) { Fabricate(:category) }
   fab!(:topic1) { Fabricate(:topic, category: category, created_at: 60.minutes.ago) }
   fab!(:topic2) { Fabricate(:topic, category: category, created_at: 120.minutes.ago) }
 
-  before do
-    user.user_stat.update!(new_since: 1.days.ago)
-  end
-
   describe '#perform!' do
     it 'dismisses two topics' do
       expect { described_class.new(user, Topic.all).perform! }.to change { DismissedTopicUser.count }.by(2)
+    end
+
+    it 'returns dismissed topic ids' do
+      expect(described_class.new(user, Topic.all).perform!.sort).to eq([topic1.id, topic2.id])
     end
 
     it 'respects max_new_topics limit' do
@@ -26,6 +26,18 @@ describe DismissTopics do
       expect(dismissed_topic_user.user_id).to eq(user.id)
       expect(dismissed_topic_user.topic_id).to eq(topic1.id)
       expect(dismissed_topic_user.created_at).not_to be_nil
+    end
+
+    it 'respects seen topics' do
+      Fabricate(:topic_user, user: user, topic: topic1, last_read_post_number: 1)
+      Fabricate(:topic_user, user: user, topic: topic2, last_read_post_number: 1)
+      expect { described_class.new(user, Topic.all).perform! }.to change { DismissedTopicUser.count }.by(0)
+    end
+
+    it 'dismisses when topic user without last_read_post_number' do
+      Fabricate(:topic_user, user: user, topic: topic1, last_read_post_number: nil)
+      Fabricate(:topic_user, user: user, topic: topic2, last_read_post_number: nil)
+      expect { described_class.new(user, Topic.all).perform! }.to change { DismissedTopicUser.count }.by(2)
     end
 
     it 'respects new_topic_duration_minutes' do

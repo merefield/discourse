@@ -65,6 +65,7 @@ en:
   themes:
     bad_color_scheme: "Can not update theme, invalid color palette"
     other_error: "Something went wrong updating theme"
+    ember_selector_error: "Sorry – using #ember or .ember-view CSS selectors is not permitted, because these names are dynamically generated at runtime and will change over time, eventually resulting in broken CSS. Try a different selector."
     compile_error:
       unrecognized_extension: "Unrecognized file extension: %{extension}"
     import_error:
@@ -259,7 +260,6 @@ en:
     muted_topic: "Sorry, that user muted this topic."
     receiver_does_not_allow_pm: "Sorry, that user does not allow you to send them private messages."
     sender_does_not_allow_pm: "Sorry, you do not allow that user to send you private messages."
-    receiver_does_not_allow_other_user_pm: "Sorry, that user does not allow an existing participant to send them private messages."
 
   backup:
     operation_already_running: "An operation is currently running. Can't start a new job right now."
@@ -615,6 +615,9 @@ en:
           attributes:
             execute_at:
               in_the_past: "must be in the future."
+            duration_minutes:
+              cannot_be_zero: "must be greater than 0."
+              exceeds_maximum: "cannot be more than 20 years."
         translation_overrides:
           attributes:
             value:
@@ -1730,7 +1733,6 @@ en:
     top_topics_formula_first_post_likes_multiplier: "value of first post likes multiplier (n) in top topics formula: `log(views_count) * 2 + op_likes_count * (n) + LEAST(likes_count / posts_count, 3) + 10 + log(posts_count)`"
     top_topics_formula_least_likes_per_post_multiplier: "value of least likes per post multiplier (n) in top topics formula: `log(views_count) * 2 + op_likes_count * 0.5 + LEAST(likes_count / posts_count, (n)) + 10 + log(posts_count)`"
 
-    rebake_old_posts_count: "Number of old posts to be rebaked every 15 minutes."
     enable_safe_mode: "Allow users to enter safe mode to debug plugins."
 
     rate_limit_create_topic: "After creating a topic, users must wait (n) seconds before creating another topic."
@@ -1780,6 +1782,7 @@ en:
 
     external_system_avatars_enabled: "Use external system avatars service."
     external_system_avatars_url: "URL of the external system avatars service. Allowed substitutions are {username} {first_letter} {color} {size}"
+    external_emoji_url: "URL of the external service for emoji images. Leave blank to disable."
     use_site_small_logo_as_system_avatar: "Use the site's small logo instead of the system user's avatar. Requires the logo to be present."
     restrict_letter_avatar_colors: "A list of 6-digit hexadecimal color values to be used for letter avatar background."
 
@@ -1799,8 +1802,6 @@ en:
     min_ratio_to_crop: "Ratio used to crop tall images. Enter the result of width / height."
 
     simultaneous_uploads: "Maximum number of files that can be dragged & dropped in the composer"
-
-    enable_flash_video_onebox: "Enable embedding of swf and flv (Adobe Flash) links in oneboxes. WARNING: may introduce security risks."
 
     default_invitee_trust_level: "Default trust level (0-4) for invited users."
     default_trust_level: "Default trust level (0-4) for all new users. WARNING! Changing this will put you at serious risk for spam."
@@ -2180,6 +2181,8 @@ en:
     max_allowed_message_recipients: "Maximum recipients allowed in a message."
     watched_words_regular_expressions: "Watched words are regular expressions."
 
+    enable_diffhtml_preview: "Experimental feature which uses diffHTML to sync preview instead of full re-render"
+
     old_post_notice_days: "Days before post notice becomes old"
     new_user_notice_tl: "Minimum trust level required to see new user post notices."
     returning_user_notice_tl: "Minimum trust level required to see returning user post notices."
@@ -2236,7 +2239,6 @@ en:
 
     allow_user_api_keys: "Allow generation of user API keys"
     allow_user_api_key_scopes: "List of scopes allowed for user API keys"
-    max_api_keys_per_user: "Maximum number of user API keys per user"
     min_trust_level_for_user_api_key: "Trust level required for generation of user API keys"
     allowed_user_api_auth_redirects: "Allowed URL for authentication redirect for user API keys. Wildcard symbol * can be used to match any part of it (e.g. www.example.com/*)."
     allowed_user_api_push_urls: "Allowed URLs for server push to user API"
@@ -2300,6 +2302,7 @@ en:
       invalid_string_min_max: "Must be between %{min} and %{max} characters."
       invalid_string_min: "Must be at least %{min} characters."
       invalid_string_max: "Must be no more than %{max} characters."
+      invalid_json: "Invalid JSON."
       invalid_reply_by_email_address: "Value must contain '%{reply_key}' and be different from the notification email."
       invalid_alternative_reply_by_email_addresses: "All values must contain '%{reply_key}' and be different from the notification email."
       pop3_polling_host_is_empty: "You must set a 'pop3 polling host' before enabling POP3 polling."
@@ -2558,6 +2561,8 @@ en:
       fixed_primary_email: "Fixed primary email for staged user"
       same_ip_address: "Same IP address (%{ip_address}) as other users"
       inactive_user: "Inactive user"
+      reviewable_reject_auto: "Auto handle queued reviewables"
+      reviewable_reject: "Reviewable user rejected"
     email_in_spam_header: "User's first email was flagged as spam"
     already_silenced: "User was already silenced by %{staff} %{time_ago}."
     already_suspended: "User was already suspended by %{staff} %{time_ago}."
@@ -3151,7 +3156,15 @@ en:
       text_body_template: |
         We're sorry, but your email message to %{destination} (titled %{former_title}) didn't work.
 
-        Do you use more than one email address? Did you reply from a different email address? Email replies require that you use the same email address when replying. Alternately, the Message-ID header in the email may have been modified.
+        Here are some things to check:
+
+          - Do you use more than one email address? Did you reply from a different email address than the one you originally used? Email replies require that you use the same email address when replying.
+
+          - Did your email software properly use the Reply-To: email address when replying? Unfortunately, some email software incorrectly sends replies to the From: address, which won’t work.
+
+          - Was the Message-ID header in the email modified? The Message-ID must be consistent and unchanged.
+
+        Need more help? Reach out to us via the Contact Us details at %{base_url}/about
 
     email_reject_old_destination:
       title: "Email Reject Old Destination"
@@ -3629,9 +3642,7 @@ en:
       text_body_template: |
         You have been suspended from the forum until %{suspended_till}.
 
-        %{reason}
-
-        %{message}
+        Reason - %{reason}
 
     account_silenced:
       title: "Account Silenced"
@@ -3639,9 +3650,7 @@ en:
       text_body_template: |
         You have been silenced from the forum until %{silenced_till}.
 
-        %{reason}
-
-        %{message}
+        Reason - %{reason}
 
     account_exists:
       title: "Account already exists"
@@ -4826,10 +4835,6 @@ en:
                 label: "Categories boxes"
               categories_boxes_with_topics:
                 label: "Categories boxes with Topics"
-
-      emoji:
-        title: "Emoji"
-        description: "Which Emoji style do you prefer for your community? You can add more custom Emoji later via Admin, Customize, Emoji."
 
       invites:
         title: "Invite Staff"

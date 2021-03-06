@@ -575,6 +575,20 @@ en:
         title: "Why are you rejecting this user?"
         send_email: "Send rejection email"
 
+    relative_time_picker:
+      minutes:
+        one: "minute"
+        other: "minutes"
+      hours:
+        one: "hour"
+        other: "hours"
+      days:
+        one: "day"
+        other: "days"
+      months:
+        one: "month"
+        other: "months"
+
     time_shortcut:
       later_today: "Later today"
       next_business_day: "Next business day"
@@ -586,6 +600,7 @@ en:
       start_of_next_business_week_alt: "Next Monday"
       next_month: "Next month"
       custom: "Custom date and time"
+      relative: "Relative time"
       none: "None needed"
       last_custom: "Last"
 
@@ -967,6 +982,8 @@ en:
         sunday: "Sunday"
         to: "to"
       activity_stream: "Activity"
+      read: "Read"
+      read_help: "Recently read topics"
       preferences: "Preferences"
       feature_topic_on_profile:
         open_search: "Select a New Topic"
@@ -1306,6 +1323,7 @@ en:
         checking: "Checking username availability..."
         prefilled: "Email matches this registered username"
         required: "Please enter a username"
+        edit: "Edit username"
 
       locale:
         title: "Interface language"
@@ -1541,6 +1559,7 @@ en:
         title: "Profile Picture"
         header_title: "profile, messages, bookmarks and preferences"
         name_and_description: "%{name} - %{description}"
+        edit: "Edit Profile Picture"
       title:
         title: "Title"
         none: "(none)"
@@ -1674,8 +1693,10 @@ en:
     search_hint: "username, email or IP address"
 
     create_account:
+      header_title: "Welcome!"
+      subheader_title: "Let's create your account"
       disclaimer: "By registering, you agree to the <a href='%{privacy_link}' target='blank'>privacy policy</a> and <a href='%{tos_link}' target='blank'>terms of service</a>."
-      title: "Create New Account"
+      title: "Create your account"
       failed: "Something went wrong, perhaps this email is already registered, try the forgot password link"
 
     forgot_password:
@@ -1697,6 +1718,7 @@ en:
     email_login:
       link_label: "Email me a login link"
       button_label: "with email"
+      login_link: "Skip the password; email me a login link"
       emoji: "lock emoji"
       complete_username: "If an account matches the username <b>%{username}</b>, you should receive an email with a login link shortly."
       complete_email: "If an account matches <b>%{email}</b>, you should receive an email with a login link shortly."
@@ -1709,6 +1731,8 @@ en:
       confirm_button: Finish Login
 
     login:
+      header_title: "Welcome Back"
+      subheader_title: "Log in to your account"
       title: "Log In"
       username: "User"
       password: "Password"
@@ -1724,7 +1748,7 @@ en:
       security_key_not_allowed_error: "The security key authentication process either timed out or was cancelled."
       security_key_no_matching_credential_error: "No matching credentials could be found in the provided security key."
       security_key_support_missing_error: "Your current device or browser does not support the use of security keys. Please use a different method."
-      email_placeholder: "email or username"
+      email_placeholder: "Email / Username"
       caps_lock_warning: "Caps Lock is on"
       error: "Unknown error"
       cookies_error: "Your browser seems to have cookies disabled. You might not be able to log in without enabling them first."
@@ -1795,7 +1819,6 @@ en:
       apple_international: "Apple/International"
       google: "Google"
       twitter: "Twitter"
-      emoji_one: "JoyPixels (formerly EmojiOne)"
       win10: "Win10"
       google_classic: "Google Classic"
       facebook_messenger: "Facebook Messenger"
@@ -2236,7 +2259,7 @@ en:
     go_back: "go back"
     not_logged_in_user: "user page with summary of current activity and preferences"
     current_user: "go to your user page"
-    view_all: "view all"
+    view_all: "view all %{tab}"
 
     topics:
       new_messages_marker: "last visit"
@@ -2425,6 +2448,7 @@ en:
         when: "When:"
         time_frame_required: "Please select a time frame"
         min_duration: "Duration must be greater than 0"
+        max_duration: "Duration must be less than 20 years"
       auto_update_input:
         none: "Select a timeframe"
         now: "Now"
@@ -2453,9 +2477,11 @@ en:
         title: "Close Temporarily"
       auto_close:
         title: "Auto-Close Topic"
-        label: "Auto-close topic hours:"
+        label: "Auto-close topic after:"
         error: "Please enter a valid value."
         based_on_last_post: "Don't close until the last post in the topic is at least this old."
+      auto_close_after_last_post:
+        title: "Auto-Close Topic After Last Post"
       auto_delete:
         title: "Auto-Delete Topic"
       auto_bump:
@@ -2469,7 +2495,7 @@ en:
         auto_open: "This topic will automatically open %{timeLeft}."
         auto_close: "This topic will automatically close %{timeLeft}."
         auto_publish_to_category: "This topic will be published to <a href=%{categoryUrl}>#%{categoryName}</a> %{timeLeft}."
-        auto_close_based_on_last_post: "This topic will close %{duration} after the last reply."
+        auto_close_after_last_post: "This topic will close %{duration} after the last reply."
         auto_delete: "This topic will be automatically deleted %{timeLeft}."
         auto_bump: "This topic will be automatically bumped %{timeLeft}."
         auto_reminder: "You will be reminded about this topic %{timeLeft}."
@@ -2923,6 +2949,7 @@ en:
         change_post_notice: "Change Staff Notice"
         delete_post_notice: "Delete Staff Notice"
         remove_timer: "remove timer"
+        edit_timer: "edit timer"
 
       actions:
         people:
@@ -3112,19 +3139,19 @@ en:
       notifications:
         watching:
           title: "Watching"
-          description: "You will automatically watch all topics in these categories. You will be notified of every new post in every topic, and a count of new replies will be shown."
+          description: "You will automatically watch all topics in this category. You will be notified of every new post in every topic, and a count of new replies will be shown."
         watching_first_post:
           title: "Watching First Post"
           description: "You will be notified of new topics in this category but not replies to the topics."
         tracking:
           title: "Tracking"
-          description: "You will automatically track all topics in these categories. You will be notified if someone mentions your @name or replies to you, and a count of new replies will be shown."
+          description: "You will automatically track all topics in this category. You will be notified if someone mentions your @name or replies to you, and a count of new replies will be shown."
         regular:
           title: "Normal"
           description: "You will be notified if someone mentions your @name or replies to you."
         muted:
           title: "Muted"
-          description: "You will never be notified of anything about new topics in these categories, and they will not appear in latest."
+          description: "You will never be notified of anything about new topics in this category, and they will not appear in latest."
       search_priority:
         label: "Search Priority"
         options:
@@ -3607,6 +3634,7 @@ en:
       custom_message_template_topic: "Hey, I thought you might enjoy this topic!"
 
     forced_anonymous: "Due to extreme load, this is temporarily being shown to everyone as a logged out user would see it."
+    forced_anonymous_login_required: "The site is under extreme load and cannot be loaded at this time, try again in a few minutes."
 
     footer_nav:
       back: "Back"
@@ -4165,6 +4193,7 @@ en:
           included_components: "Included components"
           add_all: "Add all"
           import_web_tip: "Repository containing theme"
+          direct_install_tip: "Are you sure you want to install <strong>%{name}</strong> from the repository listed below?"
           import_web_advanced: "Advanced..."
           import_file_tip: ".tar.gz, .zip, or .dcstyle.json file containing theme"
           is_private: "Theme is in a private git repository"
@@ -4206,6 +4235,7 @@ en:
             one: "Theme is %{count} commit behind!"
             other: "Theme is %{count} commits behind!"
           compare_commits: "(See new commits)"
+          remote_theme_edits: "If you want to edit this theme, you must <a href='%{repoURL}' target='_blank'>submit a change on its repository</a>"
           repo_unreachable: "Couldn't contact the Git repository of this theme. Error message:"
           imported_from_archive: "This theme was imported from a .zip file"
           scss:
@@ -4572,31 +4602,33 @@ en:
         title: "Watched Words"
         search: "search"
         clear_filter: "Clear"
-        show_words: "show words"
-        one_word_per_line: "One word per line"
+        show_words:
+          one: "show %{count} word"
+          other: "show %{count} words"
         download: Download
         clear_all: Clear All
         clear_all_confirm_block: "Are you sure you want to clear all watched words for the Block action?"
         clear_all_confirm_censor: "Are you sure you want to clear all watched words for the Censor action?"
         clear_all_confirm_flag: "Are you sure you want to clear all watched words for the Flag action?"
         clear_all_confirm_require_approval: "Are you sure you want to clear all watched words for the Require Approval action?"
-        word_count:
-          one: "%{count} word"
-          other: "%{count} words"
         actions:
           block: "Block"
           censor: "Censor"
           require_approval: "Require Approval"
           flag: "Flag"
+          replace: "Replace"
         action_descriptions:
           block: "Prevent posts containing these words from being posted. The user will see an error message when they try to submit their post."
           censor: "Allow posts containing these words, but replace them with characters that hide the censored words."
           require_approval: "Posts containing these words will require approval by staff before they can be seen."
           flag: "Allow posts containing these words, but flag them as inappropriate so moderators can review them."
+          replace: "Replace words in posts with other words or links"
         form:
-          label: "New Word:"
+          label: "New Word"
           placeholder: "full word or * as wildcard"
           placeholder_regexp: "regular expression"
+          replacement_label: "Replacement"
+          replacement_placeholder: "example or https://example.com"
           add: "Add"
           success: "Success"
           exists: "Already exists"
@@ -4650,6 +4682,9 @@ en:
         not_verified: "Not verified"
         check_email:
           title: "Reveal this user's email address"
+          text: "Show"
+        check_sso:
+          title: "Reveal SSO payload"
           text: "Show"
 
       user:
@@ -4974,6 +5009,9 @@ en:
           modal_no: "No, only apply change going forward"
         simple_list:
           add_item: "Add item..."
+        json_schema:
+          edit: Launch JSON Editor
+          modal_title: "Edit %{name}"
 
       badges:
         title: Badges

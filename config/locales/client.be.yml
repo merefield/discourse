@@ -675,7 +675,6 @@ be:
     trust_level: "ўзровень даверу"
     search_hint: "імя карыстальніка, email або IP-адрас"
     create_account:
-      title: "Стварыць новы акаўнт"
       failed: "Нешта пайшло не так; хутчэй за ўсё, гэтую электронную пошту ўжо зарэгістравана, паспрабуйце спасылкі Забыўся пароль"
     forgot_password:
       title: "Скід пароля"
@@ -690,7 +689,6 @@ be:
       username: "Карыстальнік"
       password: "Пароль"
       second_factor_backup_description: "Калі ласка, увядзіце адзін з рэзервовых кодаў:"
-      email_placeholder: "электронная пошта ці імя карыстальніка"
       caps_lock_warning: "Caps Lock уключаны"
       error: "Невядомая памылка"
       reset_password: "скінуць пароль"
@@ -1723,11 +1721,6 @@ be:
           flagged_posts: "абскарджаны паведамлення"
           likes_given: "упадабаныя"
           likes_received: "атрыманыя перавагі"
-        sso:
-          external_id: "знешні ID"
-          external_username: "Імя карыстальніка"
-          external_name: "Імя"
-          external_email: "Электронная пошта"
       user_fields:
         untitled: "без загалоўка"
         type: "тып поля"

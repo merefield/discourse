@@ -1080,8 +1080,6 @@ id:
     created_lowercase: "dibuat"
     trust_level: "Tingkat Kepercayaan"
     search_hint: "username, email, atau alamat IP"
-    create_account:
-      title: "Buat Akun Baru"
     forgot_password:
       title: "Atur Ulang Kata Sandi"
       action: "Saya lupa password"
@@ -1098,7 +1096,6 @@ id:
       title: "Log In"
       username: "Pengguna"
       password: "Kata Sandi"
-      email_placeholder: "email atau username"
       caps_lock_warning: "Tombol \"Caps Lock\" menyala"
       error: "Galat yang tidak diketahui"
       blank_username: "Silakan masukkan email atau nama pengguna Anda."
@@ -1139,7 +1136,6 @@ id:
       apple_international: "Apple/Internasional"
       google: "Google"
       twitter: "Twitter"
-      emoji_one: "JoyPixels (dahulu EmojiOne)"
       win10: "Win10"
       google_classic: "Google Classic"
       facebook_messenger: "Facebook Messenger"
@@ -1607,6 +1603,7 @@ id:
           settings: "Pengaturan"
           collapse: Persempit
           upload: "Unggah"
+          direct_install_tip: "Apakah Anda yakin ingin memasang <strong>%{name}</strong> dari repositori yang tercantum di bawah ini?"
           about_theme: "Tentang"
           enable: "Aktifkan"
           disable: "Nonaktifkan"
@@ -1714,10 +1711,6 @@ id:
           posts_read: "Tulisan dilihat"
           likes_given: "Likes Diberikan"
           likes_received: "Likes Diterima"
-        sso:
-          external_username: "Nama Pengguna"
-          external_name: "Nama"
-          external_email: "Email"
       user_fields:
         save: "Simpan"
         edit: "Ubah"

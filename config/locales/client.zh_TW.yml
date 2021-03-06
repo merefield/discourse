@@ -854,7 +854,6 @@ zh_TW:
         secondary: "次要電子郵件"
         primary_label: "一級"
         update_email: "修改電子郵件地址"
-        sso_override_instructions: "單一登入服務提供者可更新電子郵件"
         no_secondary: "無次要電子郵件"
         instructions: "不會公開顯示"
         ok: "我們將寄一封確認郵件給您。"
@@ -1152,7 +1151,6 @@ zh_TW:
     trust_level: "信任等級"
     search_hint: "使用者名稱、電子郵件、或是IP位址"
     create_account:
-      title: "建立新帳號"
       failed: "發生了某些錯誤，可能此電子郵件地址已經註冊過，請試試看忘記密碼連結"
     forgot_password:
       title: "寄出密碼"
@@ -1182,7 +1180,6 @@ zh_TW:
       password: "密碼"
       second_factor_description: "請輸入應用程式中的驗證碼："
       second_factor_backup_description: "請輸入一組您的備用碼"
-      email_placeholder: "電子郵件地址或使用者名稱"
       caps_lock_warning: "大寫鎖定中"
       error: "未知的錯誤"
       rate_limit: "嘗試重新登入前請先等待"
@@ -1543,7 +1540,6 @@ zh_TW:
     go_back: "返回"
     not_logged_in_user: "使用者頁面（包含目前活動及喜好的摘要）"
     current_user: "到你的使用者頁面"
-    view_all: "查看全部"
     topics:
       new_messages_marker: "上次到訪"
       bulk:
@@ -1654,7 +1650,7 @@ zh_TW:
         remove: "移除計時器"
         publish_to: "發佈至："
         when: "當："
-        time_frame_required: 請選擇一個有效時間範圍
+        time_frame_required: "請選擇一個有效時間範圍"
       auto_update_input:
         none: "選擇有效時間範圍"
         later_today: "今日稍晚"
@@ -1682,7 +1678,6 @@ zh_TW:
         title: "暫時關閉"
       auto_close:
         title: "自動關閉話題"
-        label: "自動關閉話題的期限:"
         error: "請輸入一個有效的值。"
         based_on_last_post: "在最後一個文章發表後，不自動關閉話題。"
       auto_delete:
@@ -1695,7 +1690,6 @@ zh_TW:
         auto_open: "此話題將在%{timeLeft}後自動開啟"
         auto_close: "此話題將在%{timeLeft}後自動關閉"
         auto_publish_to_category: "這個話題會被發佈到<a href=%{categoryUrl}>#%{categoryName}</a>%{timeLeft}。"
-        auto_close_based_on_last_post: "這個話題在最後一個回覆後%{duration}將關閉。"
         auto_delete: "這個話題將會被自動刪除%{timeLeft}。"
         auto_bump: "話題在%{timeLeft}後會自動浮上來"
         auto_reminder: "您會收到關於這個話題的提醒%{timeLeft}。"
@@ -1841,13 +1835,11 @@ zh_TW:
         username_placeholder: "使用者名稱"
         action: "送出邀請"
         help: "通過電子郵件或通知邀請其他人到該話題"
-        sso_enabled: "輸入其使用者名，邀請其人到本話題。"
         to_topic_blank: "輸入你想邀請的使用者的使用者名稱或電子郵件地址到該話題"
         to_topic_email: "你輸入了郵箱地址。我們將發送一封郵件邀請，讓你的朋友可直接回覆該話題。"
         to_topic_username: "你輸入了使用者名。我們將發送一個至該話題連結的邀請通知。"
         to_username: "輸入你想邀請的人的使用者名。我們將發送一個至該話題連結的邀請通知。"
         email_placeholder: "電子郵件地址"
-        success_email: "我們發了一封郵件邀請<b>%{emailOrUsername}</b>。邀請被接受後你會收到通知。檢查使用者頁中的邀請標籤頁來追蹤你的邀請。"
         success_username: "我們已經邀請該使用者加入此話題討論"
         error: "抱歉，我們不能邀請這個人。可能他已經被邀請了？（邀請有頻率限制）"
         success_existing_email: "已經有一個有此電子郵件 <b>%{emailOrUsername}</b> 的使用者存在。我們已邀請那位使用者來參與這個話題。"
@@ -2155,19 +2147,16 @@ zh_TW:
       notifications:
         watching:
           title: "關注"
-          description: "你將自動關注這些分類中的所有話題。每一個話題的每一個新帖，將通知你，還將顯示新回覆的數量。"
         watching_first_post:
           title: "關注新的發文"
           description: "您會收到此分類中的新話題通知，話題回應則不會。"
         tracking:
           title: "追蹤"
-          description: "你將自動追蹤這些分類中的所有話題。如果有人@你或回覆你，將通知你，還將顯示新回覆的數量。"
         regular:
           title: "一般"
           description: "如果有人@你或回覆你，將通知你。"
         muted:
           title: "靜音"
-          description: "在這些分類裡面，你將不會收到新話題任何通知，它們也不會出現在“最新”話題列表。 "
       search_priority:
         label: "優先搜尋"
         options:
@@ -2633,10 +2622,6 @@ zh_TW:
             available: "可以使用此群組名稱"
             not_available: "無法使用此群組名稱"
             blank: "群組名稱不能空白"
-        bulk_add:
-          title: "批次加入群組"
-          complete_users_not_added: "這些使用者沒有被加入 (請確認他們都已有帳號)："
-          paste: "請貼上使用者名稱或 email，一行一個："
         add_members:
           as_owner: "將使用者設為此群組的擁有者"
         manage:
@@ -3283,11 +3268,8 @@ zh_TW:
         title: "已關注的文字"
         search: "搜尋"
         clear_filter: "清除"
-        show_words: "顯示文字"
         download: 下載
         clear_all: 清除全部
-        word_count:
-          other: "%{count}個字"
         actions:
           block: "封鎖"
           censor: "審核"
@@ -3299,7 +3281,6 @@ zh_TW:
           require_approval: "含有這些文字的貼文需要經過管理員審查才能被發佈。"
           flag: "允許貼文含有這些文字，但標註成不當的用字以讓管理員能審核。"
         form:
-          label: "新的單字"
           placeholder: "完整單字或萬用字元（*）"
           placeholder_regexp: "正規表示法"
           add: "新增"
@@ -3504,13 +3485,6 @@ zh_TW:
           on_grace_period: "目前在升級優惠階段，將不會被降級。"
           locked_will_not_be_promoted: "信任等級鎖定。將不會再被升級。"
           locked_will_not_be_demoted: "信任等級鎖定。將不會再被降級。"
-        sso:
-          title: "單一登入"
-          external_id: "外部 ID"
-          external_username: "使用者名稱"
-          external_name: "名稱"
-          external_email: "電子郵件"
-          external_avatar_url: "個人資料圖片 URL"
       user_fields:
         title: "使用者欄位"
         help: "增加欄位讓你的使用者可以填寫"
