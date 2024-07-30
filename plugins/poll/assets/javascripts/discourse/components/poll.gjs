@@ -24,6 +24,7 @@ const REGULAR = "regular";
 const RANKED_CHOICE = "ranked_choice";
 const ON_VOTE = "on_vote";
 const ON_CLOSE = "on_close";
+const CLOSED = "closed";
 
 export default class PollComponent extends Component {
   @service currentUser;
@@ -48,6 +49,37 @@ export default class PollComponent extends Component {
   isNumber = this.args.attrs.poll.type === NUMBER;
   groupableUserFields = this.args.attrs.groupableUserFields;
 
+  checkUserGroups = (user, poll) => {
+    const pollGroups =
+      poll && poll.groups && poll.groups.split(",").map((g) => g.toLowerCase());
+
+    if (!pollGroups) {
+      return true;
+    }
+
+    const userGroups =
+      user && user.groups && user.groups.map((g) => g.name.toLowerCase());
+
+    return userGroups && pollGroups.some((g) => userGroups.includes(g));
+  };
+  areRanksValid = (arr) => {
+    let ranks = new Set(); // Using a Set to keep track of unique ranks
+    let hasNonZeroDuplicate = false;
+
+    arr.forEach((obj) => {
+      const rank = obj.rank;
+
+      if (rank !== 0) {
+        if (ranks.has(rank)) {
+          hasNonZeroDuplicate = true;
+          return; // Exit forEach loop if a non-zero duplicate is found
+        }
+        ranks.add(rank);
+      }
+    });
+
+    return !hasNonZeroDuplicate;
+  };
   get options() {
     return this.args.attrs.poll.options;
   }
@@ -176,43 +208,8 @@ export default class PollComponent extends Component {
   }
 
   get hideResultsDisabled() {
-    return (
-      !this.staffOnly && (this.closed || this.topicArchived)
-    );
+    return !this.staffOnly && (this.closed || this.topicArchived);
   }
-
-  checkUserGroups = (user, poll) => {
-    const pollGroups =
-      poll && poll.groups && poll.groups.split(",").map((g) => g.toLowerCase());
-
-    if (!pollGroups) {
-      return true;
-    }
-
-    const userGroups =
-      user && user.groups && user.groups.map((g) => g.name.toLowerCase());
-
-    return userGroups && pollGroups.some((g) => userGroups.includes(g));
-  };
-
-  areRanksValid = (arr) => {
-    let ranks = new Set(); // Using a Set to keep track of unique ranks
-    let hasNonZeroDuplicate = false;
-
-    arr.forEach((obj) => {
-      const rank = obj.rank;
-
-      if (rank !== 0) {
-        if (ranks.has(rank)) {
-          hasNonZeroDuplicate = true;
-          return; // Exit forEach loop if a non-zero duplicate is found
-        }
-        ranks.add(rank);
-      }
-    });
-
-    return !hasNonZeroDuplicate;
-  };
 
   @action
   castVotes() {
@@ -326,10 +323,7 @@ export default class PollComponent extends Component {
   }
 
   get showCastVotesButton() {
-    return (
-      (this.isMultiple || this.isRankedChoice) &&
-      !this.showResults
-    );
+    return (this.isMultiple || this.isRankedChoice) && !this.showResults;
   }
 
   get castVotesButtonClass() {
@@ -352,13 +346,9 @@ export default class PollComponent extends Component {
 
   get showShowResultsButton() {
     return (
-      !this..showResults &&
+      !this.showResults &&
       !this.hideResultsDisabled &&
-      !(
-        this.poll.results === ON_VOTE &&
-        !this.hasSavedVote &&
-        !this.isMe
-      ) &&
+      !(this.poll.results === ON_VOTE && !this.hasSavedVote && !this.isMe) &&
       !(this.poll.results === ON_CLOSE && !this.closed) &&
       !(this.poll.results === STAFF_ONLY && !this.isStaff) &&
       this.voters > 0
@@ -397,8 +387,7 @@ export default class PollComponent extends Component {
     const totalScore = this.options.reduce((total, o) => {
       return total + parseInt(o.html, 10) * parseInt(o.votes, 10);
     }, 0);
-    const average =
-      this.voters === 0 ? 0 : round(totalScore / this.voters, -2);
+    const average = this.voters === 0 ? 0 : round(totalScore / this.voters, -2);
 
     return htmlSafe(I18n.t("poll.average_rating", { average }));
   }
