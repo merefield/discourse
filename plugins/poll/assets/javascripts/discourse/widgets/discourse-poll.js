@@ -3,6 +3,8 @@ import RenderGlimmer from "discourse/widgets/render-glimmer";
 import { createWidget } from "discourse/widgets/widget";
 import { PIE_CHART_TYPE } from "../components/modal/poll-ui-builder";
 
+const RANKED_CHOICE = "ranked_choice";
+
 export default createWidget("discourse-poll", {
   tagName: "div",
   buildKey: (attrs) => `poll-${attrs.id}`,
@@ -21,15 +23,28 @@ export default createWidget("discourse-poll", {
   },
 
   html(attrs) {
+    attrs.poll.options.forEach((option) => {
+      option.rank = 0;
+      if (attrs.poll.type === RANKED_CHOICE) {
+        attrs.vote.forEach((vote) => {
+          if (vote.digest === option.id) {
+            option.rank = vote.rank;
+          }
+        });
+      }
+    });
+
+    let attributes = Object.assign(attrs);
+
     return [
       new RenderGlimmer(
         this,
         "div.poll",
-        hbs`<Poll @attrs={{@data.attrs}} @preloadedVoters={{@data.preloadedVoters}} @options={{@data.options}} />`,
+        hbs`<Poll
+          @attrs={{@data.attributes}}
+        />`,
         {
-          attrs,
-          preloadedVoters: attrs.poll.preloaded_voters,
-          options: attrs.poll.options,
+          attributes,
         }
       ),
     ];

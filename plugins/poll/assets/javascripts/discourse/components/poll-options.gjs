@@ -13,7 +13,7 @@ export default class PollOptionsComponent extends Component {
   @service currentUser;
 
   isChosen = (option) => {
-    return this.args.votes.includes(option.id);
+    return this.args.votes?.includes(option.id);
   };
 
   @action
@@ -27,7 +27,7 @@ export default class PollOptionsComponent extends Component {
   }
   <template>
     <ul class={{concatClass (if @isRankedChoice "ranked-choice-poll-options")}}>
-      {{#each @options as |option|}}
+      {{#each @options key="rank" as |option|}}
         {{#if @isRankedChoice}}
           <PollOptionRankedChoice
             @option={{option}}
