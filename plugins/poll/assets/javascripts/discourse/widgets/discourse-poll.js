@@ -40,7 +40,7 @@ export default createWidget("discourse-poll", {
       new RenderGlimmer(
         this,
         "div.poll",
-        hbs`<PollWrapper
+        hbs`<Poll
           @attrs={{@data.attributes}}
         />`,
         {
