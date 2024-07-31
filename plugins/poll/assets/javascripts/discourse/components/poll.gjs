@@ -62,6 +62,45 @@ export default class PollComponent extends Component {
 
     return userGroups && pollGroups.some((g) => userGroups.includes(g));
   };
+
+  @action
+  castVotes() {
+    return ajax("/polls/vote", {
+      type: "PUT",
+      data: {
+        post_id: this.post.id,
+        poll_name: this.poll.name,
+        options: this.vote,
+      },
+    })
+      .then(({ poll }) => {
+        this.hasSavedVote = true;
+        this.poll.setProperties(poll);
+        this.appEvents.trigger("poll:voted", poll, this.post, this.vote);
+
+        if (this.poll.results !== "on_close") {
+          this.showResults = true;
+        }
+        if (this.poll.results === "staff_only") {
+          if (this.currentUser && this.currentUser.staff) {
+            this.showResults = true;
+          } else {
+            this.showResults = false;
+          }
+        }
+      })
+      .catch((error) => {
+        if (error) {
+          if (!this.isMultiple && !this.isRankedChoice) {
+            this.vote = [...this.vote];
+          }
+          popupAjaxError(error);
+        } else {
+          this.dialog.alert(I18n.t("poll.error_while_casting_votes"));
+        }
+      });
+  }
+
   areRanksValid = (arr) => {
     let ranks = new Set(); // Using a Set to keep track of unique ranks
     let hasNonZeroDuplicate = false;
@@ -209,44 +248,6 @@ export default class PollComponent extends Component {
 
   get hideResultsDisabled() {
     return !this.staffOnly && (this.closed || this.topicArchived);
-  }
-
-  @action
-  castVotes() {
-    return ajax("/polls/vote", {
-      type: "PUT",
-      data: {
-        post_id: this.post.id,
-        poll_name: this.poll.name,
-        options: this.vote,
-      },
-    })
-      .then(({ poll }) => {
-        this.hasSavedVote = true;
-        this.poll.setProperties(poll);
-        this.appEvents.trigger("poll:voted", poll, this.post, this.vote);
-
-        if (this.poll.results !== "on_close") {
-          this.showResults = true;
-        }
-        if (this.poll.results === "staff_only") {
-          if (this.currentUser && this.currentUser.staff) {
-            this.showResults = true;
-          } else {
-            this.showResults = false;
-          }
-        }
-      })
-      .catch((error) => {
-        if (error) {
-          if (!this.isMultiple && !this.isRankedChoice) {
-            this.vote = [...this.vote];
-          }
-          popupAjaxError(error);
-        } else {
-          this.dialog.alert(I18n.t("poll.error_while_casting_votes"));
-        }
-      });
   }
 
   @action
