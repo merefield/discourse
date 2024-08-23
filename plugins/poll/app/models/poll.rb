@@ -17,7 +17,7 @@ class Poll < ActiveRecord::Base
 
   enum visibility: { secret: 0, everyone: 1 }, _scopes: false
 
-  enum chart_type: { bar: 0, pie: 1 }, _scopes: false
+  enum chart_type: { bar: 0, pie: 1, ranked_choice_outcome: 2 }, _scopes: false
 
   validates :min, numericality: { allow_nil: true, only_integer: true, greater_than_or_equal_to: 0 }
   validates :max, numericality: { allow_nil: true, only_integer: true, greater_than: 0 }

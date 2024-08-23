@@ -8,6 +8,7 @@ import I18n from "discourse-i18n";
 
 export const BAR_CHART_TYPE = "bar";
 export const PIE_CHART_TYPE = "pie";
+export const RANKED_CHOICE_CHART_TYPE = "ranked_choice_outcome";
 
 export const REGULAR_POLL_TYPE = "regular";
 export const NUMBER_POLL_TYPE = "number";
@@ -185,6 +186,9 @@ export default class PollUiBuilderModal extends Component {
     }
     if (pollType === NUMBER_POLL_TYPE) {
       pollHeader += ` step=${step}`;
+    }
+    if (pollType === RANKED_CHOICE_POLL_TYPE) {
+      chartType = RANKED_CHOICE_CHART_TYPE;
     }
     pollHeader += ` public=${publicPoll ? "true" : "false"}`;
     if (chartType && pollType !== NUMBER_POLL_TYPE) {
