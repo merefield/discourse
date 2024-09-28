@@ -2,6 +2,8 @@
 
 class DiscoursePoll::RankedChoice
   MAX_ROUNDS = 50
+  SANKEY_COLOUR_SATURATION = 70.0
+  SANKEY_COLOUR_LIGHTNESS = 50.0
 
   def self.outcome(poll_id)
     options = PollOption.where(poll_id: poll_id).map { |hash| { id: hash.digest, html: hash.html } }
@@ -23,7 +25,6 @@ class DiscoursePoll::RankedChoice
         user_votes.select { |vote| vote.rank > 0 }.map { |vote| vote.poll_option.digest }
       ballot << ballot_paper
     end
-    # byebug
     DiscoursePoll::RankedChoice.run(ballot, options) if ballot.length > 0
   end
 
@@ -34,9 +35,9 @@ class DiscoursePoll::RankedChoice
     round = 0
     node_key_index = 0
     sankey_nodes = []
+    sankey_colours = get_sankey_colours(options)
     sankey_labels = {}
     while round < MAX_ROUNDS
-      # byebug
       round += 1
 
       # Count the first place votes for each candidate
@@ -63,6 +64,7 @@ class DiscoursePoll::RankedChoice
             sankey_data: {
               sankey_nodes: sankey_nodes,
               sankey_labels: sankey_labels,
+              sankey_colours: sankey_colours,
             },
           }
         )
@@ -70,20 +72,18 @@ class DiscoursePoll::RankedChoice
 
       # Find the candidate(s) with the least votes
       losers = identify_losers(tally)
-      # byebug
 
       # Collect flow data before eliminating candidates
       round_flows = Hash.new { |h, k| h[k] = Hash.new(0) }
 
       current_votes.each do |vote|
-        #  byebug
         if losers.include?(vote.first)
-          #  byebug
           from_candidate = vote.first + "_" + round.to_s
           updated_vote = vote.reject { |candidate| losers.include?(candidate) }
+          next if updated_vote.empty?
           to_candidate = updated_vote.first + "_" + (round + 1).to_s
           round_flows[from_candidate][to_candidate] += 1
-        elsif potential_winners.keys.include?(vote.first)
+        else
           from_candidate = vote.first + "_" + round.to_s
           to_candidate = vote.first + "_" + (round + 1).to_s
           round_flows[from_candidate][to_candidate] += 1
@@ -98,12 +98,10 @@ class DiscoursePoll::RankedChoice
         from_html = enrich(from_candidate.split("_").first, options)[:html]
         from_hash = { "#{from_candidate}": from_html }
         key_to_check = from_hash.keys.first
-        #        unless sankey_labels.any? { |hash| hash.key?(key_to_check) }
         sankey_labels.merge!(from_hash) unless sankey_labels.key?(key_to_check)
         to_html = enrich(to_candidate_digest.split("_").first, options)[:html]
         to_hash = { "#{to_candidate_digest}": to_html }
         key_to_check = to_hash.keys.first
-        # sankey_labels.any? { |hash| hash.key?(key_to_check) }
         sankey_labels.merge!(to_hash) unless sankey_labels.key?(key_to_check)
       end
 
@@ -127,6 +125,7 @@ class DiscoursePoll::RankedChoice
             sankey_data: {
               sankey_nodes: sankey_nodes,
               sankey_labels: sankey_labels,
+              sankey_colours: sankey_colours,
             },
           }
         )
@@ -145,6 +144,7 @@ class DiscoursePoll::RankedChoice
       sankey_data: {
         sankey_nodes: sankey_nodes,
         sankey_labels: sankey_labels,
+        sankey_colours: sankey_colours,
       },
     }
   end
@@ -187,5 +187,52 @@ class DiscoursePoll::RankedChoice
 
   def self.enrich(digest, options)
     { digest: digest, html: options.find { |option| option[:id] == digest }[:html] }
+  end
+
+  def self.hue2rgb(p, q, t)
+    t += 1 if t < 0
+    t -= 1 if t > 1
+
+    if t < 1.0 / 6
+      p + (q - p) * 6 * t
+    elsif t < 1.0 / 2
+      q
+    elsif t < 2.0 / 3
+      p + (q - p) * (2.0 / 3 - t) * 6
+    else
+      p
+    end
+  end
+
+  def self.hsl_to_rgb(h, s, l)
+    h /= 360.0 # Normalize h to [0, 1]
+    s /= 100.0 # Normalize s to [0, 1]
+    l /= 100.0 # Normalize l to [0, 1]
+
+    if s == 0
+      r = g = b = l * 255
+    else
+      q = l < 0.5 ? l * (1 + s) : l + s - l * s
+      p = 2 * l - q
+      r = hue2rgb(p, q, h + 1.0 / 3) * 255
+      g = hue2rgb(p, q, h) * 255
+      b = hue2rgb(p, q, h - 1.0 / 3) * 255
+    end
+
+    [r.round, g.round, b.round]
+  end
+
+  def self.get_sankey_colours(options)
+    # Generate unique colors for each option
+    n = options.length
+    options.each_with_index do |option, i|
+      hue = i * (360.0 / n)
+      r, g, b = hsl_to_rgb(hue, SANKEY_COLOUR_SATURATION, SANKEY_COLOUR_LIGHTNESS)
+      color = sprintf("#%02X%02X%02X", r, g, b)
+      option[:color] = color
+    end
+
+    # Output the options with colors
+    options
   end
 end
