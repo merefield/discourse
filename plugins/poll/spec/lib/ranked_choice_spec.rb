@@ -27,6 +27,16 @@ RSpec.describe DiscoursePoll::RankedChoice do
     ]
   end
 
+  let(:options_5) do
+    [
+      { id: "A", html: "A" },
+      { id: "B", html: "B" },
+      { id: "C", html: "C" },
+      { id: "D", html: "D" },
+      { id: "E", html: "E" },
+    ]
+  end
+
   it "correctly finds the winner with a simple majority" do
     votes = [%w[Alice Bob], %w[Bob Alice], %w[Alice Bob], %w[Bob Alice], %w[Alice Bob]]
     expect(described_class.run(votes, options_1)[:winning_candidate]).to eq(
@@ -106,5 +116,34 @@ RSpec.describe DiscoursePoll::RankedChoice do
       [{ digest: "Mystery", html: "Mystery" }, { digest: "Fantasy", html: "Fantasy" }],
     )
     expect(outcome[:round_activity].length).to eq(3)
+  end
+
+  it "handles a winner with multiple identical votes" do
+    votes = [
+      %w[B C A D E],
+      %w[B C A D E],
+      %w[B C A D E],
+      %w[C A D B E],
+      %w[C A D B E],
+      %w[C A D B E],
+      %w[C A D B E],
+      %w[B D C A E],
+      %w[B D C A E],
+      %w[B D C A E],
+      %w[B D C A E],
+      %w[D C A E B],
+      %w[D C A E B],
+      %w[D C A E B],
+      %w[D C A E B],
+      %w[D C A E B],
+      %w[D C A E B],
+      %w[B E A C D],
+      %w[B E A C D],
+      %w[E A D B C],
+    ]
+
+    outcome = described_class.run(votes, options_5)
+
+    expect(outcome[:winning_candidate]).to eq({ digest: "D", html: "D" })
   end
 end
